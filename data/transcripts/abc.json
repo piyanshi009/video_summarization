@@ -1,0 +1,32 @@
+[
+    {
+        "start": 0.0,
+        "end": 7.6,
+        "text": "Phase 2. Real-time protection and dashboard. The second layer works in real-time. It"
+    },
+    {
+        "start": 7.6,
+        "end": 13.92,
+        "text": "detects attacks like front running or sandwich attacks and activates the safe mode to private"
+    },
+    {
+        "start": 13.92,
+        "end": 21.2,
+        "text": "relays. So, boards can't take advantage. A dashboard acts like the F1 pit wall and showing"
+    },
+    {
+        "start": 21.2,
+        "end": 28.56,
+        "text": "actions of every transactions. Hair car represents transactions and flag represents signals."
+    },
+    {
+        "start": 28.56,
+        "end": 37.28,
+        "text": "Green flag means safe and red flag means under attack. Users can even view simulations to see"
+    },
+    {
+        "start": 37.28,
+        "end": 47.28,
+        "text": "how much laws they've avoided two days fine."
+    }
+]
