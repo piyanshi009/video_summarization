@@ -1,5 +1,29 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import FlashcardViewer from '../components/FlashcardViewer';
+import QuizViewer from '../components/EnhancedQuizViewer.jsx';
+
+const API_URL = 'http://127.0.0.1:8000';
+
+function readStudyData() {
+  try {
+    const stored = localStorage.getItem('studyData');
+    if (!stored) return {};
+
+    const parsed = JSON.parse(stored);
+
+    return parsed &&
+      typeof parsed === 'object' &&
+      !Array.isArray(parsed)
+      ? parsed
+      : {};
+  } catch (error) {
+    console.error('Failed to read study data:', error);
+    return {};
+  }
+}
 
 function StudySpace({ videoHistory = [] }) {
   const [selectedId, setSelectedId] = useState('');
@@ -7,72 +31,134 @@ function StudySpace({ videoHistory = [] }) {
   const [content, setContent] = useState({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const selectedIdRef = useRef('');
 
   const selectedVideo = videoHistory.find(
     (video) => video.video_id === selectedId
   );
 
   useEffect(() => {
+    selectedIdRef.current = selectedId;
+
     if (!selectedId) {
       setContent({});
       return;
     }
 
-    try {
-      const stored = localStorage.getItem('studyData');
-      const studyData = stored ? JSON.parse(stored) : {};
-      setContent(studyData[selectedId] || {});
-    } catch (err) {
-      console.error('Failed to load study data:', err);
-      setContent({});
-      setError('Could not load saved study materials.');
-    }
+    const studyData = readStudyData();
+    const savedContent = studyData[selectedId];
+
+    setContent(
+      savedContent &&
+        typeof savedContent === 'object' &&
+        !Array.isArray(savedContent)
+        ? savedContent
+        : {}
+    );
+
+    setError('');
   }, [selectedId]);
 
+  useEffect(() => {
+    if (
+      selectedId &&
+      !videoHistory.some((video) => video.video_id === selectedId)
+    ) {
+      setSelectedId('');
+      setContent({});
+    }
+  }, [videoHistory, selectedId]);
+
   const handleGenerate = async (task) => {
-    if (!selectedId || loading) return;
+    const videoId = selectedId;
+
+    if (!videoId || loading) return;
 
     setLoading(true);
     setError('');
 
     try {
-      const response = await fetch('http://127.0.0.1:8000/study/generate', {
+      const response = await fetch(`${API_URL}/study/generate`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({
-          video_id: selectedId,
+          video_id: videoId,
           task,
         }),
       });
 
-      const data = await response.json();
+      let data;
+
+      try {
+        data = await response.json();
+      } catch {
+        throw new Error(
+          'The server returned an invalid response. Please try again.'
+        );
+      }
 
       if (!response.ok) {
-        throw new Error(data.detail || 'Error generating study material.');
+        const message =
+          typeof data?.detail === 'string'
+            ? data.detail
+            : 'Failed to generate study material.';
+
+        throw new Error(message);
       }
 
-      if (typeof data.content !== 'string' || !data.content.trim()) {
-        throw new Error('The AI returned empty content. Please try again.');
+      if (
+        typeof data?.content !== 'string' ||
+        !data.content.trim()
+      ) {
+        throw new Error(
+          'The AI returned empty content. Please try again.'
+        );
       }
 
-      const updatedContent = {
-        ...content,
+      // Save the result under the video that was originally selected.
+      const studyData = readStudyData();
+
+      studyData[videoId] = {
+        ...(studyData[videoId] || {}),
         [task]: data.content,
       };
 
-      setContent(updatedContent);
+      try {
+        localStorage.setItem(
+          'studyData',
+          JSON.stringify(studyData)
+        );
+      } catch (storageError) {
+        console.error('Failed to save study data:', storageError);
+        throw new Error(
+          'Study material was generated, but could not be saved. Check browser storage.'
+        );
+      }
 
-      const stored = localStorage.getItem('studyData');
-      const studyData = stored ? JSON.parse(stored) : {};
-
-      studyData[selectedId] = {
-        ...(studyData[selectedId] || {}),
-        [task]: data.content,
-      };
-
-      localStorage.setItem('studyData', JSON.stringify(studyData));
+      // Do not replace the current screen if another video was selected.
+      if (selectedIdRef.current === videoId) {
+        setContent((previous) => ({
+          ...previous,
+          [task]: data.content,
+        }));
+      }
     } catch (err) {
-      setError(err.message || 'Something went wrong.');
+      console.error('Study material generation failed:', err);
+
+      let message = err.message || 'Something went wrong.';
+
+      if (
+        err instanceof TypeError &&
+        /fetch/i.test(err.message)
+      ) {
+        message =
+          'Cannot connect to the backend. Make sure FastAPI is running at ' +
+          API_URL;
+      }
+
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -80,24 +166,45 @@ function StudySpace({ videoHistory = [] }) {
 
   const copyToClipboard = async (text) => {
     try {
+      if (!navigator.clipboard) {
+        throw new Error('Clipboard access is unavailable.');
+      }
+
       await navigator.clipboard.writeText(text);
       alert('Copied to clipboard!');
-    } catch {
-      setError('Could not copy. Please check your browser permissions.');
+    } catch (err) {
+      console.error('Copy failed:', err);
+      setError(
+        'Could not copy the content. Check browser permissions or use HTTPS/localhost.'
+      );
     }
   };
 
   const download = (text, filename) => {
-    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
+    let url;
 
-    link.href = url;
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    URL.revokeObjectURL(url);
+    try {
+      const blob = new Blob([text], {
+        type: 'text/plain;charset=utf-8',
+      });
+
+      url = URL.createObjectURL(blob);
+
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (err) {
+      console.error('Download failed:', err);
+      setError('Could not download the study material.');
+    } finally {
+      if (url) {
+        URL.revokeObjectURL(url);
+      }
+    }
   };
 
   const tabs = [
@@ -107,7 +214,9 @@ function StudySpace({ videoHistory = [] }) {
     { id: 'revision', label: 'Revision Sheet' },
   ];
 
-  const activeLabel = tabs.find((tab) => tab.id === activeTab)?.label;
+  const activeLabel = tabs.find(
+    (tab) => tab.id === activeTab
+  )?.label;
 
   return (
     <section
@@ -118,27 +227,21 @@ function StudySpace({ videoHistory = [] }) {
         padding: '0 1rem',
       }}
     >
-      <h1 style={{ color: 'var(--color-primary)' }}>AI Study Space</h1>
+      <h1 style={{ color: 'var(--color-primary)' }}>
+        AI Study Space
+      </h1>
+
       <p style={{ color: 'var(--color-text-primary)' }}>
         Turn your videos into learning materials.
       </p>
 
       {videoHistory.length === 0 ? (
         <div style={{ padding: '2rem 0', textAlign: 'center' }}>
-          <p style={{ color: 'var(--color-text-primary)' }}>
-            No videos available yet. Upload a video to get started.
-          </p>
+          <p>No videos available yet. Upload a video to get started.</p>
+
           <button
             onClick={() => {
               window.location.href = '/upload';
-            }}
-            style={{
-              background: 'var(--color-primary)',
-              color: '#fff',
-              border: 'none',
-              borderRadius: 'var(--radius)',
-              padding: '0.7rem 1rem',
-              cursor: 'pointer',
             }}
           >
             Upload Video
@@ -172,8 +275,12 @@ function StudySpace({ videoHistory = [] }) {
             }}
           >
             <option value="">-- Choose a video --</option>
+
             {videoHistory.map((video) => (
-              <option key={video.video_id} value={video.video_id}>
+              <option
+                key={video.video_id}
+                value={video.video_id}
+              >
                 {video.filename}
                 {video.summary_generated ? ' (Summarized)' : ''}
               </option>
@@ -233,7 +340,11 @@ function StudySpace({ videoHistory = [] }) {
           >
             <h2>{activeLabel}</h2>
 
-            {loading && <p>Generating your study material…</p>}
+            {loading && (
+              <p role="status">
+                Generating your study material…
+              </p>
+            )}
 
             {error && (
               <p role="alert" style={{ color: '#ef4444' }}>
@@ -243,17 +354,22 @@ function StudySpace({ videoHistory = [] }) {
 
             {!loading && content[activeTab] && (
               <>
-                <pre
-                  style={{
-                    whiteSpace: 'pre-wrap',
-                    overflowWrap: 'anywhere',
-                    fontFamily: 'inherit',
-                    lineHeight: 1.7,
-                    color: 'var(--color-text-primary)',
-                  }}
-                >
-                  {content[activeTab]}
-                </pre>
+                {activeTab === 'notes' ||
+                activeTab === 'revision' ? (
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {content[activeTab]}
+                  </ReactMarkdown>
+                ) : activeTab === 'flashcards' ? (
+                  <FlashcardViewer
+                    rawContent={content[activeTab]}
+                  />
+                ) : activeTab === 'quiz' ? (
+                  <QuizViewer
+                    rawContent={content[activeTab]}
+                    onRegenerate={() => handleGenerate('quiz')}
+                    loading={loading}
+                  />
+                ) : null}
 
                 <div
                   style={{
@@ -264,38 +380,35 @@ function StudySpace({ videoHistory = [] }) {
                   }}
                 >
                   <button
-                    onClick={() => copyToClipboard(content[activeTab])}
-                    style={{
-                      background: 'var(--color-primary)',
-                      color: '#fff',
-                      border: 'none',
-                      borderRadius: 'var(--radius)',
-                      padding: '0.6rem 0.9rem',
-                      cursor: 'pointer',
-                    }}
+                    onClick={() =>
+                      copyToClipboard(content[activeTab])
+                    }
                   >
                     Copy
                   </button>
 
                   <button
-                    onClick={() =>
+                    onClick={() => {
+                      const filename = (
+                        selectedVideo.filename || 'video'
+                      )
+                        .replace(/\.[^/.]+$/, '')
+                        .replace(/[<>:"/\\|?*]/g, '_');
+
                       download(
                         content[activeTab],
-                        `${(selectedVideo.filename || 'video')
-                          .replace(/\.[^/.]+$/, '')
-                          .replace(/[<>:"/\\|?*]/g, '_')}_${activeTab}.txt`
-                      )
-                    }
-                    style={{
-                      background: 'var(--color-surface)',
-                      color: 'var(--color-primary)',
-                      border: '1px solid var(--color-primary)',
-                      borderRadius: 'var(--radius)',
-                      padding: '0.6rem 0.9rem',
-                      cursor: 'pointer',
+                        `${filename}_${activeTab}.txt`
+                      );
                     }}
                   >
                     Download
+                  </button>
+
+                  <button
+                    onClick={() => handleGenerate(activeTab)}
+                    disabled={loading}
+                  >
+                    {loading ? 'Regenerating…' : 'Regenerate'}
                   </button>
                 </div>
               </>
@@ -304,9 +417,10 @@ function StudySpace({ videoHistory = [] }) {
             {!loading && !content[activeTab] && (
               <div>
                 <p>
-                  Generate {activeLabel?.toLowerCase()} from this video's
-                  content.
+                  Generate {activeLabel?.toLowerCase()} from
+                  this video's content.
                 </p>
+
                 <button
                   onClick={() => handleGenerate(activeTab)}
                   disabled={loading}

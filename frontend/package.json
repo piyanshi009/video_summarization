@@ -11,9 +11,12 @@
   },
   "dependencies": {
     "lucide-react": "^1.60.0",
+    "prop-types": "^15.8.1",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
-    "react-router-dom": "^6.30.6"
+    "react-markdown": "^9.0.0",
+    "react-router-dom": "^6.30.6",
+    "remark-gfm": "^4.0.0"
   },
   "devDependencies": {
     "@types/react": "^19.3.0",
