@@ -139,8 +139,8 @@ const SettingsPage = ({ videoHistory = [], setVideoHistory }) => {
                 padding: '1.25rem',
                 borderRadius: 'var(--radius)',
                 border: `2px solid ${theme === 'dark' ? 'var(--color-primary)' : 'var(--color-border)'}`,
-                background: '#090B18',
-                color: '#F8F9FE',
+                background: '#101010',
+                color: '#FAF7F0',
                 textAlign: 'left',
                 cursor: 'pointer',
                 display: 'flex',
@@ -150,11 +150,11 @@ const SettingsPage = ({ videoHistory = [], setVideoHistory }) => {
               }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontWeight: 700, fontSize: '1rem' }}>Futuristic Dark</span>
-                <Moon size={18} style={{ color: '#A78BFA' }} />
+                <span style={{ fontWeight: 700, fontSize: '1rem' }}>Obsidian Gold</span>
+                <Moon size={18} style={{ color: '#F5C96A' }} />
               </div>
-              <p style={{ fontSize: '0.82rem', color: '#94A3B8' }}>
-                Deep midnight navy palette (#090B18) with glowing violet accents.
+              <p style={{ fontSize: '0.82rem', color: '#C5C0B6' }}>
+                Deep obsidian palette (#101010) with rich gold accents (#D4A853).
               </p>
             </button>
 
@@ -167,8 +167,8 @@ const SettingsPage = ({ videoHistory = [], setVideoHistory }) => {
                 padding: '1.25rem',
                 borderRadius: 'var(--radius)',
                 border: `2px solid ${theme === 'light' ? 'var(--color-primary)' : 'var(--color-border)'}`,
-                background: '#FFFFFF',
-                color: '#15112B',
+                background: '#FAF8F5',
+                color: '#1C1917',
                 textAlign: 'left',
                 cursor: 'pointer',
                 display: 'flex',
@@ -178,11 +178,11 @@ const SettingsPage = ({ videoHistory = [], setVideoHistory }) => {
               }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontWeight: 700, fontSize: '1rem' }}>Crisp Light</span>
-                <Sun size={18} style={{ color: '#F59E0B' }} />
+                <span style={{ fontWeight: 700, fontSize: '1rem' }}>Warm Ivory</span>
+                <Sun size={18} style={{ color: '#D4A853' }} />
               </div>
-              <p style={{ fontSize: '0.82rem', color: '#64748B' }}>
-                Clean illuminated lavender surfaces for daylight readability.
+              <p style={{ fontSize: '0.82rem', color: '#57534E' }}>
+                Warm ivory background with elegant gold accents for daylight focus.
               </p>
             </button>
           </div>

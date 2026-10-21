@@ -49,7 +49,7 @@ const TopNav = ({ toggleMobileMenu, isMobileOpen }) => {
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: '0.85rem 1.75rem',
-        background: 'var(--color-surface)',
+        background: 'var(--color-surface-elevated, #1B1B1B)',
         borderBottom: '1px solid var(--color-border)',
         position: 'sticky',
         top: 0,

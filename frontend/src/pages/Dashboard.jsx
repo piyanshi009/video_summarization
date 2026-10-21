@@ -98,7 +98,7 @@ const Dashboard = ({ videoHistory = [] }) => {
               color: 'var(--color-text-primary)',
             }}
           >
-            Turn any video into <span style={{ color: 'var(--color-lavender)' }}>actionable knowledge</span>
+            Turn any video into <span style={{ color: 'var(--color-primary-highlight, #F5C96A)' }}>actionable knowledge</span>
           </h1>
 
           <p
@@ -134,7 +134,7 @@ const Dashboard = ({ videoHistory = [] }) => {
             width: '320px',
             height: '320px',
             borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(120, 85, 255, 0.22) 0%, transparent 70%)',
+            background: 'radial-gradient(circle, var(--color-primary-glow) 0%, transparent 70%)',
             pointerEvents: 'none',
           }}
         />

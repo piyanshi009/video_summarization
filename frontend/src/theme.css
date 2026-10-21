@@ -1,27 +1,33 @@
-/* Lumio AI - Design System & Tokens */
+/* Lumio AI - Design System & Tokens - Obsidian Gold */
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 
 :root {
   --font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 
-  /* Brand Accents */
-  --color-primary: #7855FF;
-  --color-primary-hover: #6742F0;
-  --color-primary-glow: rgba(120, 85, 255, 0.28);
-  --color-lavender: #A78BFA;
-  --color-lavender-light: #DDD6FE;
-  --color-accent-cyan: #38BDF8;
+  /* Obsidian Gold Core Brand Tokens */
+  --color-primary: #D4A853;
+  --color-primary-hover: #C29640;
+  --color-primary-highlight: #F5C96A;
+  --color-lavender: #F5C96A;
+  --color-lavender-light: #FDE68A;
+  --color-primary-glow: rgba(212, 168, 83, 0.28);
+  --color-primary-light: rgba(212, 168, 83, 0.15);
+  --color-primary-surface: #292318;
+  --color-muted-gold: #292318;
+  --color-primary-text: #12100C;
+
+  --color-accent-cyan: #F5C96A;
   --color-success: #10B981;
   --color-warning: #F59E0B;
   --color-error: #EF4444;
 
   /* Gradients */
-  --gradient-primary: linear-gradient(135deg, #7855FF 0%, #5B3AEB 100%);
-  --gradient-primary-hover: linear-gradient(135deg, #8767FF 0%, #6848F2 100%);
-  --gradient-accent: linear-gradient(135deg, #A78BFA 0%, #7855FF 100%);
-  --gradient-subtle: linear-gradient(180deg, rgba(120, 85, 255, 0.08) 0%, rgba(120, 85, 255, 0.02) 100%);
-  --gradient-glow: radial-gradient(circle at 50% 0%, rgba(120, 85, 255, 0.12) 0%, transparent 70%);
+  --gradient-primary: linear-gradient(135deg, #D4A853 0%, #B88B35 100%);
+  --gradient-primary-hover: linear-gradient(135deg, #E2B760 0%, #C99A40 100%);
+  --gradient-accent: linear-gradient(135deg, #F5C96A 0%, #D4A853 100%);
+  --gradient-subtle: linear-gradient(180deg, rgba(212, 168, 83, 0.08) 0%, rgba(212, 168, 83, 0.02) 100%);
+  --gradient-glow: radial-gradient(circle at 50% 0%, rgba(212, 168, 83, 0.16) 0%, transparent 70%);
 
   /* Radii */
   --radius-xs: 6px;
@@ -35,50 +41,61 @@
   --transition-normal: 0.25s ease;
   --transition-smooth: cubic-bezier(0.16, 1, 0.3, 1);
 
-  /* Light Theme */
-  --color-bg: #F8F7FF;
-  --color-bg-alt: #F1EFFE;
+  /* Light Theme (Warm Ivory & Refined Gold) */
+  --color-bg: #FAF8F5;
+  --color-bg-alt: #F3EFEA;
   --color-surface: #FFFFFF;
-  --color-surface-hover: #F8F7FF;
+  --color-surface-hover: #F8F5EE;
   --color-surface-elevated: #FFFFFF;
-  --color-border: #E4E0FA;
-  --color-border-subtle: #ECE9FD;
-  --color-primary-light: rgba(120, 85, 255, 0.1);
-  --color-primary-surface: rgba(120, 85, 255, 0.06);
+  --color-sidebar: #FFFFFF;
+  --color-border: #E5DFC8;
+  --color-border-subtle: #EFEBE0;
 
-  --color-text-primary: #15112B;
-  --color-text-secondary: #585370;
-  --color-text-muted: #8B85A4;
+  --color-text-primary: #1C1917;
+  --color-text-secondary: #57534E;
+  --color-text-muted: #8C867E;
 
-  --shadow-sm: 0 1px 3px rgba(21, 17, 43, 0.04);
-  --shadow-md: 0 4px 16px -2px rgba(21, 17, 43, 0.06);
-  --shadow-lg: 0 12px 32px -4px rgba(21, 17, 43, 0.08);
-  --shadow-glow: 0 0 24px -2px rgba(120, 85, 255, 0.2);
+  --shadow-sm: 0 1px 3px rgba(42, 34, 20, 0.04);
+  --shadow-md: 0 4px 16px -2px rgba(42, 34, 20, 0.07);
+  --shadow-lg: 0 12px 32px -4px rgba(42, 34, 20, 0.1);
+  --shadow-glow: 0 0 24px -2px rgba(212, 168, 83, 0.2);
 }
 
-/* Dark Theme - Futuristic Midnight Navy Visual Identity */
+/* Dark Theme - Obsidian Gold Visual Identity */
 [data-theme="dark"] {
-  --color-bg: #090B18;
-  --color-bg-alt: #0E1122;
-  --color-surface: #15182B;
-  --color-surface-hover: #1B1E35;
-  --color-surface-elevated: #1B1E35;
-  --color-border: #262B45;
-  --color-border-subtle: #1C2036;
-  --color-primary-light: rgba(120, 85, 255, 0.16);
-  --color-primary-surface: rgba(120, 85, 255, 0.08);
+  --color-bg: #101010;
+  --color-bg-alt: #171717;
+  --color-surface: #2A2927;
+  --color-surface-hover: #33312F;
+  --color-surface-elevated: #1B1B1B;
+  --color-sidebar: #1B1B1B;
+  --color-border: #3A3833;
+  --color-border-subtle: #2C2A26;
 
-  --color-text-primary: #F8F9FE;
-  --color-text-secondary: #94A3B8;
-  --color-text-muted: #64748B;
+  --color-primary: #D4A853;
+  --color-primary-hover: #C29640;
+  --color-primary-highlight: #F5C96A;
+  --color-lavender: #F5C96A;
+  --color-lavender-light: #FDE68A;
+  --color-primary-light: rgba(212, 168, 83, 0.15);
+  --color-primary-surface: #292318;
+  --color-muted-gold: #292318;
+  --color-primary-text: #12100C;
 
-  --gradient-subtle: linear-gradient(180deg, rgba(120, 85, 255, 0.12) 0%, rgba(120, 85, 255, 0.02) 100%);
-  --gradient-glow: radial-gradient(circle at 50% 0%, rgba(120, 85, 255, 0.18) 0%, transparent 70%);
+  --color-text-primary: #FAF7F0;
+  --color-text-secondary: #C5C0B6;
+  --color-text-muted: #8E8980;
 
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.35);
-  --shadow-md: 0 8px 24px -4px rgba(0, 0, 0, 0.55);
-  --shadow-lg: 0 16px 48px -8px rgba(0, 0, 0, 0.7);
-  --shadow-glow: 0 0 32px -4px rgba(120, 85, 255, 0.32);
+  --gradient-primary: linear-gradient(135deg, #D4A853 0%, #B88B35 100%);
+  --gradient-primary-hover: linear-gradient(135deg, #E2B760 0%, #C99A40 100%);
+  --gradient-accent: linear-gradient(135deg, #F5C96A 0%, #D4A853 100%);
+  --gradient-subtle: linear-gradient(180deg, rgba(212, 168, 83, 0.10) 0%, rgba(212, 168, 83, 0.02) 100%);
+  --gradient-glow: radial-gradient(circle at 50% 0%, rgba(212, 168, 83, 0.18) 0%, transparent 70%);
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.45);
+  --shadow-md: 0 8px 24px -4px rgba(0, 0, 0, 0.65);
+  --shadow-lg: 0 16px 48px -8px rgba(0, 0, 0, 0.85);
+  --shadow-glow: 0 0 32px -4px rgba(212, 168, 83, 0.32);
 }
 
 * {
@@ -100,8 +117,8 @@ html, body {
 body {
   background-color: var(--color-bg);
   background-image: 
-    radial-gradient(at 100% 0%, rgba(120, 85, 255, 0.08) 0px, transparent 50%),
-    radial-gradient(at 0% 100%, rgba(56, 189, 248, 0.04) 0px, transparent 50%);
+    radial-gradient(at 100% 0%, rgba(212, 168, 83, 0.06) 0px, transparent 45%),
+    radial-gradient(at 0% 100%, rgba(245, 201, 106, 0.04) 0px, transparent 45%);
   background-attachment: fixed;
 }
 
@@ -124,7 +141,7 @@ a {
 }
 
 a:hover {
-  color: var(--color-lavender);
+  color: var(--color-primary-highlight);
 }
 
 /* Interactive Controls */
@@ -190,15 +207,15 @@ input:focus, select:focus, textarea:focus {
 
 .lumio-card:hover {
   box-shadow: var(--shadow-md);
-  border-color: rgba(120, 85, 255, 0.35);
+  border-color: rgba(212, 168, 83, 0.4);
 }
 
 .lumio-btn-primary {
   background: var(--gradient-primary);
-  color: #FFFFFF;
+  color: var(--color-primary-text);
   padding: 0.7rem 1.4rem;
   border-radius: var(--radius);
-  font-weight: 600;
+  font-weight: 700;
   font-size: 0.95rem;
   display: inline-flex;
   align-items: center;
@@ -212,7 +229,7 @@ input:focus, select:focus, textarea:focus {
   background: var(--gradient-primary-hover);
   transform: translateY(-1px);
   box-shadow: 0 6px 20px -2px var(--color-primary-glow);
-  color: #FFFFFF;
+  color: var(--color-primary-text);
 }
 
 .lumio-btn-secondary {
@@ -232,9 +249,9 @@ input:focus, select:focus, textarea:focus {
 
 .lumio-btn-secondary:hover {
   background: var(--color-surface-hover);
-  border-color: var(--color-lavender);
+  border-color: var(--color-primary);
   transform: translateY(-1px);
-  color: var(--color-text-primary);
+  color: var(--color-primary-highlight);
 }
 
 .lumio-badge {
@@ -250,7 +267,8 @@ input:focus, select:focus, textarea:focus {
 
 .lumio-badge-primary {
   background: var(--color-primary-light);
-  color: var(--color-primary);
+  color: var(--color-primary-highlight);
+  border: 1px solid rgba(212, 168, 83, 0.25);
 }
 
 .lumio-badge-success {
@@ -290,12 +308,12 @@ input:focus, select:focus, textarea:focus {
   font-weight: 800;
   border-bottom: 1px solid var(--color-border);
   padding-bottom: 0.5rem;
-  color: var(--color-lavender);
+  color: var(--color-primary-highlight);
 }
 
 .lumio-study-markdown h2 {
   font-size: 1.35rem;
-  color: var(--color-lavender);
+  color: var(--color-primary-highlight);
 }
 
 .lumio-study-markdown h3 {
@@ -382,4 +400,3 @@ input:focus, select:focus, textarea:focus {
 .lumio-spin {
   animation: spin 1s linear infinite;
 }
-

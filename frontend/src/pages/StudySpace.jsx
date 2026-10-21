@@ -320,7 +320,7 @@ function StudySpace({ videoHistory = [] }) {
                     padding: '0.65rem 1.15rem',
                     borderRadius: 'var(--radius)',
                     background: isActive ? 'var(--gradient-primary)' : 'transparent',
-                    color: isActive ? '#FFFFFF' : 'var(--color-text-secondary)',
+                    color: isActive ? 'var(--color-primary-text, #12100C)' : 'var(--color-text-secondary)',
                     fontWeight: isActive ? 700 : 600,
                     fontSize: '0.92rem',
                     display: 'inline-flex',
@@ -331,7 +331,7 @@ function StudySpace({ videoHistory = [] }) {
                     whiteSpace: 'nowrap',
                   }}
                 >
-                  <tab.icon size={17} style={{ color: isActive ? '#FFFFFF' : 'var(--color-lavender)' }} />
+                  <tab.icon size={17} style={{ color: isActive ? 'var(--color-primary-text, #12100C)' : 'var(--color-primary)' }} />
                   <span>{tab.label}</span>
                   {hasData && (
                     <span
@@ -339,7 +339,7 @@ function StudySpace({ videoHistory = [] }) {
                         width: '6px',
                         height: '6px',
                         borderRadius: '50%',
-                        background: isActive ? '#FFFFFF' : 'var(--color-primary)',
+                        background: isActive ? 'var(--color-primary-text, #12100C)' : 'var(--color-primary)',
                       }}
                     />
                   )}

@@ -43,7 +43,7 @@ const Sidebar = ({ isMobileOpen, closeMobileMenu }) => {
         className={`lumio-sidebar ${isMobileOpen ? 'open' : ''}`}
         style={{
           width: '260px',
-          background: 'var(--color-surface)',
+          background: 'var(--color-surface-elevated, #1B1B1B)',
           borderRight: '1px solid var(--color-border)',
           minHeight: '100vh',
           display: 'flex',
@@ -74,14 +74,14 @@ const Sidebar = ({ isMobileOpen, closeMobileMenu }) => {
                 alignItems: 'center',
                 justifyContent: 'center',
                 boxShadow: '0 4px 16px -2px var(--color-primary-glow)',
-                color: '#FFFFFF',
+                color: 'var(--color-primary-text, #12100C)',
                 flexShrink: 0,
               }}
             >
               {/* Geometric Play/AI Icon */}
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M5 4L19 12L5 20V4Z" fill="currentColor" fillOpacity="0.9" />
-                <circle cx="17" cy="7" r="3" fill="#A78BFA" />
+                <circle cx="17" cy="7" r="3" fill="var(--color-primary-highlight, #F5C96A)" />
               </svg>
             </div>
             <div>
@@ -96,7 +96,7 @@ const Sidebar = ({ isMobileOpen, closeMobileMenu }) => {
                   gap: '0.35rem',
                 }}
               >
-                Lumio <span style={{ color: 'var(--color-lavender)' }}>AI</span>
+                Lumio <span style={{ color: 'var(--color-primary-highlight, #F5C96A)' }}>AI</span>
               </div>
               <div 
                 style={{ 
@@ -140,8 +140,8 @@ const Sidebar = ({ isMobileOpen, closeMobileMenu }) => {
                     padding: '0.7rem 0.85rem',
                     borderRadius: 'var(--radius-sm)',
                     background: isActive ? 'var(--gradient-primary)' : 'transparent',
-                    color: isActive ? '#FFFFFF' : 'var(--color-text-secondary)',
-                    fontWeight: isActive ? 600 : 500,
+                    color: isActive ? 'var(--color-primary-text, #12100C)' : 'var(--color-text-secondary)',
+                    fontWeight: isActive ? 700 : 500,
                     fontSize: '0.92rem',
                     textDecoration: 'none',
                     position: 'relative',
@@ -154,7 +154,7 @@ const Sidebar = ({ isMobileOpen, closeMobileMenu }) => {
                       <item.icon 
                         size={19} 
                         style={{ 
-                          color: isActive ? '#FFFFFF' : 'var(--color-lavender)',
+                          color: isActive ? 'var(--color-primary-text, #12100C)' : 'var(--color-primary)',
                           opacity: isActive ? 1 : 0.85,
                           flexShrink: 0,
                         }} 
@@ -166,8 +166,8 @@ const Sidebar = ({ isMobileOpen, closeMobileMenu }) => {
                             width: '5px',
                             height: '5px',
                             borderRadius: '50%',
-                            background: '#FFFFFF',
-                            boxShadow: '0 0 8px #FFFFFF',
+                            background: 'var(--color-primary-text, #12100C)',
+                            boxShadow: '0 0 8px var(--color-primary-text, #12100C)',
                           }} 
                         />
                       )}
@@ -184,9 +184,9 @@ const Sidebar = ({ isMobileOpen, closeMobileMenu }) => {
           style={{
             padding: '1rem',
             margin: '0.75rem',
-            background: 'var(--color-bg-alt)',
+            background: 'var(--color-muted-gold, #292318)',
             borderRadius: 'var(--radius)',
-            border: '1px solid var(--color-border-subtle)',
+            border: '1px solid var(--color-border)',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.35rem' }}>

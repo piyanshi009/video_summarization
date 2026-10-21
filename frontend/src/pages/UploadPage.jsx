@@ -382,7 +382,7 @@ const UploadPage = ({ setVideoHistory }) => {
               justifyContent: 'space-between',
               flexWrap: 'wrap',
               gap: '1rem',
-              background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(120, 85, 255, 0.08) 100%)',
+              background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, var(--color-primary-light) 100%)',
               borderColor: 'rgba(16, 185, 129, 0.35)',
             }}
           >
