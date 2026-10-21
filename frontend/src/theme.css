@@ -1,0 +1,159 @@
+/* Light theme design tokens */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --color-bg: #F5F3FF;           /* soft lavender-white */
+  --color-surface: #FFFFFF;      /* sidebar and top navigation */
+  --color-primary: #6D3CF5;      /* rich violet */
+  --color-primary-light: #EDE7FF;/* pale lavender for active sidebar */
+  --color-text-primary: #24164D;/* deep purple-black */
+  --color-primary-active-text: #FFFFFF;/* active link text white */
+  --color-text-secondary: #625A78;/* muted slate-purple */
+  --color-border: #E5DDFB;       /* subtle lavender borders */
+  --radius: 12px;               /* rounded corners */
+  --color-accent-teal: #0D9488;  /* restrained teal */
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.12);
+  --font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* Dark theme overrides */
+[data-theme="dark"] {
+  --color-bg: #11121C;
+  --color-surface: #191A28;
+  --color-primary: #8B5CF6;          /* primary violet for dark mode */
+  --color-primary-light: #30264F;   /* active sidebar background */
+  --color-primary-active-text: #9B7BFF;
+  --color-text-primary: #F7F7FF;
+  --color-text-secondary: #B8B9CC;
+  --color-border: #34354A;
+  --color-accent-teal: #0D9488;      /* same teal */
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.2);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text-primary);
+  font-family: var(--font-family);
+  line-height: 1.5;
+}
+
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+a:hover {
+  opacity: 0.85;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: var(--color-primary);
+  color: #fff;
+  padding: 0.6rem 1.2rem;
+  border-radius: var(--radius);
+  font-weight: 500;
+  transition: background 0.2s ease, transform 0.1s ease;
+}
+
+button:hover {
+  background: var(--color-primary-light);
+}
+
+button:active {
+  transform: translateY(1px);
+}
+
+input, textarea {
+  font-family: var(--font-family);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-primary);
+  padding: 0.5rem;
+  border-radius: var(--radius);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-primary);
+  border-radius: var(--radius);
+}
+
+/* Utility classes */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  transition: box-shadow 0.2s ease;
+}
+
+.card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.grid-2 {
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.stat-number {
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+/* Filter dropdown styling */
+.filter-select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-color: #FFFFFF; /* light mode background */
+  color: #3B246B; /* dark purple text */
+  padding: 0.4rem 0.6rem;
+  border: 1px solid #DDD0FF; /* subtle lavender border */
+  border-radius: 12px; /* rounded corners */
+  height: 2.4rem; /* match input height */
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%233B246B' stroke-width='2'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.6rem center;
+  background-size: 0.6rem;
+  cursor: pointer;
+}
+.filter-select:hover {
+  background-color: #EDE7FF; /* slightly deeper lavender */
+}
+.filter-select:focus {
+  outline: none;
+  border-color: #C1AFFF;
+}
+[data-theme="dark"] .filter-select {
+  background-color: #2C2C3A; /* dark surface */
+  color: #E5E5FF; /* light text */
+  border: 1px solid #44475A; /* subtle dark border */
+  background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%23E5E5FF' stroke-width='2'/%3E%3C/svg%3E");
+}

@@ -1,5 +1,6 @@
-from backend.services.summerizer import generate_summary
+from backend.services.summerizer import generate_summary, generate_content
 from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pathlib import Path
 from faster_whisper import WhisperModel
 import subprocess
@@ -8,6 +9,13 @@ import shutil
 import json
 
 app = FastAPI(title="AI Video Summarizer")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Project paths
 PROJECT_DIR = Path(__file__).resolve().parent.parent
@@ -109,10 +117,13 @@ async def upload_video(file: UploadFile = File(...)):
         )
 
         summary = ""
+        summary_error: str | None = None
         if transcript_text.strip():
             try:
                 summary = generate_summary(transcript_text)
             except Exception as error:
+                # Capture error but keep transcript for debugging
+                summary_error = str(error)
                 print(f"AI summarization failed: {error}")
 
         # 4. Save transcript as JSON.
@@ -121,7 +132,8 @@ async def upload_video(file: UploadFile = File(...)):
                 {
                     "video_id": video_id,
                     "language": info.language,
-                    "segments": transcript
+                    "segments": transcript,
+                    "summary_error": summary_error,
                 },
                 output_file,
                 ensure_ascii=False,
@@ -137,7 +149,8 @@ async def upload_video(file: UploadFile = File(...)):
             "transcript_file": str(transcript_path.relative_to(PROJECT_DIR)),
             "has_speech": bool(transcript),
             "summary": summary,
-            "summary_generated": bool(summary)
+            "summary_generated": bool(summary),
+            "summary_error": summary_error,
         }
 
     except HTTPException:
@@ -151,3 +164,25 @@ async def upload_video(file: UploadFile = File(...)):
         )
     finally:
         await file.close()
+@app.post("/study/generate")
+async def generate_study(request: dict):
+    video_id = request.get("video_id")
+    task = request.get("task")
+    if not video_id or not task:
+        raise HTTPException(status_code=400, detail="video_id and task required")
+    transcript_path = OUTPUT_DIR / f"{video_id}_transcript.json"
+    if not transcript_path.exists():
+        raise HTTPException(status_code=404, detail="Transcript not found")
+    with transcript_path.open() as f:
+        trans = json.load(f)
+    segments = trans.get("segments", [])
+    transcript_text = "\n".join(f"[{seg['start']}s - {seg['end']}s] {seg['text']}" for seg in segments)
+    prompts = {
+        "notes": f"Create concise study notes from the following video transcript:\n{transcript_text}",
+        "flashcards": f"Generate flashcards (question-answer pairs) based on the following video transcript:\n{transcript_text}",
+        "quiz": f"Create a short quiz with 3-5 questions and answers based on the following video transcript:\n{transcript_text}",
+        "revision": f"Prepare a revision sheet summarizing key points from the following video transcript:\n{transcript_text}"
+    }
+    prompt = prompts.get(task, f"Summarize the following transcript:\n{transcript_text}")
+    content = generate_content(prompt)
+    return {"content": content}
