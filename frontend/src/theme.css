@@ -202,12 +202,6 @@ input:focus, select:focus, textarea:focus {
   box-shadow: var(--shadow-sm);
   position: relative;
   overflow: hidden;
-  transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
-}
-
-.lumio-card:hover {
-  box-shadow: var(--shadow-md);
-  border-color: rgba(212, 168, 83, 0.4);
 }
 
 .lumio-btn-primary {

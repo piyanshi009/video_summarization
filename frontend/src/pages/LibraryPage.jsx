@@ -238,7 +238,7 @@ const LibraryPage = ({ videoHistory = [], setVideoHistory }) => {
             return (
               <div
                 key={video.video_id}
-                className="lumio-card"
+                className="lumio-card lumio-card-interactive"
                 style={{
                   padding: '1.5rem',
                   display: 'flex',

@@ -23,6 +23,14 @@ const TopNav = ({ toggleMobileMenu, isMobileOpen }) => {
     setIsDark(prev => !prev);
   };
 
+  const [shortcutLabel, setShortcutLabel] = useState('Ctrl+K');
+
+  useEffect(() => {
+    const isMac = typeof window !== 'undefined' &&
+      (/(Mac|iPhone|iPod|iPad)/i.test(navigator.platform || navigator.userAgent));
+    setShortcutLabel(isMac ? '⌘K' : 'Ctrl+K');
+  }, []);
+
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
@@ -33,7 +41,7 @@ const TopNav = ({ toggleMobileMenu, isMobileOpen }) => {
   // Keyboard shortcut listener for Ctrl+K / Cmd+K
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
         document.getElementById('global-search-input')?.focus();
       }
@@ -127,7 +135,7 @@ const TopNav = ({ toggleMobileMenu, isMobileOpen }) => {
               pointerEvents: 'none',
             }}
           >
-            ⌘K
+            {shortcutLabel}
           </span>
         </form>
       </div>

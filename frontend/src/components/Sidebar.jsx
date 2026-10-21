@@ -133,6 +133,7 @@ const Sidebar = ({ isMobileOpen, closeMobileMenu }) => {
                   to={item.to}
                   end={item.to === '/'}
                   onClick={closeMobileMenu}
+                  className="lumio-nav-link"
                   style={({ isActive }) => ({
                     display: 'flex',
                     alignItems: 'center',
@@ -184,22 +185,36 @@ const Sidebar = ({ isMobileOpen, closeMobileMenu }) => {
           style={{
             padding: '1rem',
             margin: '0.75rem',
-            background: 'var(--color-muted-gold, #292318)',
+            background: 'var(--color-surface, #2A2927)',
             borderRadius: 'var(--radius)',
             border: '1px solid var(--color-border)',
+            boxShadow: 'var(--shadow-sm)',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.35rem' }}>
-            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--color-text-primary)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-              <Cpu size={14} color="var(--color-primary)" />
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.45rem' }}>
+            <span style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--color-text-primary)', display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+              <Cpu size={15} color="var(--color-primary-highlight, #F5C96A)" />
               Local Engine
             </span>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.7rem', color: '#10B981', fontWeight: 600 }}>
+            <span
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.35rem',
+                fontSize: '0.72rem',
+                color: '#10B981',
+                fontWeight: 700,
+                background: 'rgba(16, 185, 129, 0.16)',
+                padding: '0.15rem 0.55rem',
+                borderRadius: '999px',
+                border: '1px solid rgba(16, 185, 129, 0.35)',
+              }}
+            >
               <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10B981', boxShadow: '0 0 6px #10B981' }} />
               Active
             </span>
           </div>
-          <div style={{ fontSize: '0.72rem', color: 'var(--color-text-muted)' }}>
+          <div style={{ fontSize: '0.78rem', color: 'var(--color-text-secondary)', fontWeight: 500, lineHeight: 1.4 }}>
             Faster-Whisper • Gemini Pro
           </div>
         </div>

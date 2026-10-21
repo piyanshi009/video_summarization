@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { 
   Film, 
@@ -13,6 +13,78 @@ import {
   Copy,
   FolderOpen
 } from 'lucide-react';
+
+/**
+ * AnimatedNumber Component
+ * Smooth count-up from 0 to value with ease-out cubic curve.
+ * Avoids replaying on unrelated re-renders and respects reduced motion.
+ */
+function AnimatedNumber({ value, duration = 850 }) {
+  const [displayValue, setDisplayValue] = useState(0);
+  const hasAnimatedRef = useRef(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setDisplayValue(value);
+      return;
+    }
+
+    if (value === 0) {
+      setDisplayValue(0);
+      return;
+    }
+
+    let startTimestamp = null;
+    const startVal = hasAnimatedRef.current ? displayValue : 0;
+    const endVal = Number(value) || 0;
+
+    const step = (timestamp) => {
+      if (!startTimestamp) startTimestamp = timestamp;
+      const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+      // Smooth ease-out cubic curve: 1 - (1 - t)^3
+      const easeProgress = 1 - Math.pow(1 - progress, 3);
+      const current = Math.round(startVal + (endVal - startVal) * easeProgress);
+      setDisplayValue(current);
+
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      } else {
+        hasAnimatedRef.current = true;
+      }
+    };
+
+    const rafId = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(rafId);
+  }, [value, duration]);
+
+  return <>{displayValue}</>;
+}
+
+/**
+ * Video Card Skeleton Loader
+ */
+export function VideoCardSkeleton() {
+  return (
+    <div
+      className="lumio-card"
+      style={{
+        padding: '1.35rem',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '0.85rem',
+      }}
+    >
+      <div className="lumio-skeleton" style={{ height: '100px', width: '100%' }} />
+      <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem' }}>
+        <div className="lumio-skeleton" style={{ height: '18px', width: '35%' }} />
+        <div className="lumio-skeleton" style={{ height: '18px', width: '15%' }} />
+      </div>
+      <div className="lumio-skeleton" style={{ height: '20px', width: '80%' }} />
+      <div className="lumio-skeleton" style={{ height: '15px', width: '95%' }} />
+      <div className="lumio-skeleton" style={{ height: '15px', width: '60%' }} />
+    </div>
+  );
+}
 
 const Dashboard = ({ videoHistory = [] }) => {
   const navigate = useNavigate();
@@ -45,7 +117,7 @@ const Dashboard = ({ videoHistory = [] }) => {
     return {
       videosProcessed: totalVideos,
       summariesGenerated,
-      highlightsCreated: 0, // Feature currently in development
+      highlightsCreated: 0,
       studyNotes: totalStudyNotes,
     };
   }, [videoHistory]);
@@ -65,14 +137,15 @@ const Dashboard = ({ videoHistory = [] }) => {
   };
 
   return (
-    <div className="page-container" style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
-      {/* Hero Welcome Section */}
+    <div className="page-container" style={{ display: 'flex', flexDirection: 'column', gap: '2.25rem' }}>
+      {/* Hero Welcome Section - Polished Obsidian Gold Banner with Ambient Slow Glow */}
       <section
+        className="lumio-hero-enter"
         style={{
           background: 'var(--color-surface)',
           borderRadius: 'var(--radius-lg)',
           border: '1px solid var(--color-border)',
-          padding: '2.75rem 2.25rem',
+          padding: '2.1rem 2.25rem',
           position: 'relative',
           overflow: 'hidden',
           boxShadow: 'var(--shadow-md)',
@@ -82,7 +155,7 @@ const Dashboard = ({ videoHistory = [] }) => {
         <div style={{ maxWidth: '680px', position: 'relative', zIndex: 1 }}>
           <div
             className="lumio-badge lumio-badge-primary"
-            style={{ marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}
+            style={{ marginBottom: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}
           >
             <Sparkles size={13} />
             <span>Next-Gen Video Intelligence</span>
@@ -90,11 +163,11 @@ const Dashboard = ({ videoHistory = [] }) => {
 
           <h1
             style={{
-              fontSize: '2.6rem',
+              fontSize: '2.15rem',
               fontWeight: 800,
-              letterSpacing: '-0.035em',
-              lineHeight: 1.18,
-              marginBottom: '1rem',
+              letterSpacing: '-0.03em',
+              lineHeight: 1.24,
+              marginBottom: '0.85rem',
               color: 'var(--color-text-primary)',
             }}
           >
@@ -103,10 +176,10 @@ const Dashboard = ({ videoHistory = [] }) => {
 
           <p
             style={{
-              fontSize: '1.08rem',
+              fontSize: '1.02rem',
               color: 'var(--color-text-secondary)',
-              lineHeight: 1.6,
-              marginBottom: '1.85rem',
+              lineHeight: 1.58,
+              marginBottom: '1.5rem',
             }}
           >
             Transcribe with high-precision Whisper, synthesize deep summaries with Gemini AI, 
@@ -125,12 +198,13 @@ const Dashboard = ({ videoHistory = [] }) => {
           </div>
         </div>
 
-        {/* Decorative background glow */}
+        {/* Decorative background glow with slow-moving ambient breathing */}
         <div
+          className="lumio-hero-glow"
           style={{
             position: 'absolute',
-            right: '-80px',
-            top: '-80px',
+            right: '-70px',
+            top: '-70px',
             width: '320px',
             height: '320px',
             borderRadius: '50%',
@@ -140,7 +214,7 @@ const Dashboard = ({ videoHistory = [] }) => {
         />
       </section>
 
-      {/* Metrics Row (Derived from Real Application Data) */}
+      {/* Metrics Row - Staggered entrance, hover lift & smooth number count-up */}
       <section>
         <div
           style={{
@@ -150,7 +224,7 @@ const Dashboard = ({ videoHistory = [] }) => {
           }}
         >
           {/* Card 1: Videos Processed */}
-          <div className="lumio-card" style={{ padding: '1.5rem' }}>
+          <div className="lumio-card lumio-stat-card" style={{ padding: '1.5rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
               <span style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--color-text-secondary)' }}>
                 Videos Processed
@@ -161,6 +235,7 @@ const Dashboard = ({ videoHistory = [] }) => {
                   height: '38px',
                   borderRadius: '10px',
                   background: 'var(--color-primary-light)',
+                  border: '1px solid rgba(212, 168, 83, 0.25)',
                   color: 'var(--color-primary)',
                   display: 'flex',
                   alignItems: 'center',
@@ -171,7 +246,7 @@ const Dashboard = ({ videoHistory = [] }) => {
               </div>
             </div>
             <div style={{ fontSize: '2.2rem', fontWeight: 800, color: 'var(--color-text-primary)' }}>
-              {metrics.videosProcessed}
+              <AnimatedNumber value={metrics.videosProcessed} />
             </div>
             <div style={{ fontSize: '0.78rem', color: 'var(--color-text-muted)', marginTop: '0.35rem' }}>
               {metrics.videosProcessed > 0 ? 'Ready in local library' : 'No uploads yet'}
@@ -179,7 +254,7 @@ const Dashboard = ({ videoHistory = [] }) => {
           </div>
 
           {/* Card 2: Summaries Generated */}
-          <div className="lumio-card" style={{ padding: '1.5rem' }}>
+          <div className="lumio-card lumio-stat-card" style={{ padding: '1.5rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
               <span style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--color-text-secondary)' }}>
                 Summaries Generated
@@ -189,8 +264,9 @@ const Dashboard = ({ videoHistory = [] }) => {
                   width: '38px',
                   height: '38px',
                   borderRadius: '10px',
-                  background: 'rgba(16, 185, 129, 0.15)',
-                  color: '#10B981',
+                  background: 'var(--color-primary-light)',
+                  border: '1px solid rgba(212, 168, 83, 0.25)',
+                  color: 'var(--color-primary)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -200,7 +276,7 @@ const Dashboard = ({ videoHistory = [] }) => {
               </div>
             </div>
             <div style={{ fontSize: '2.2rem', fontWeight: 800, color: 'var(--color-text-primary)' }}>
-              {metrics.summariesGenerated}
+              <AnimatedNumber value={metrics.summariesGenerated} />
             </div>
             <div style={{ fontSize: '0.78rem', color: 'var(--color-text-muted)', marginTop: '0.35rem' }}>
               Generated via Gemini 2.5 Flash
@@ -208,7 +284,7 @@ const Dashboard = ({ videoHistory = [] }) => {
           </div>
 
           {/* Card 3: Highlights Created */}
-          <div className="lumio-card" style={{ padding: '1.5rem' }}>
+          <div className="lumio-card lumio-stat-card" style={{ padding: '1.5rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
               <span style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--color-text-secondary)' }}>
                 Highlights Created
@@ -218,8 +294,9 @@ const Dashboard = ({ videoHistory = [] }) => {
                   width: '38px',
                   height: '38px',
                   borderRadius: '10px',
-                  background: 'rgba(245, 158, 11, 0.15)',
-                  color: '#F59E0B',
+                  background: 'var(--color-surface-hover)',
+                  border: '1px solid var(--color-border)',
+                  color: 'var(--color-primary)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -229,15 +306,15 @@ const Dashboard = ({ videoHistory = [] }) => {
               </div>
             </div>
             <div style={{ fontSize: '2.2rem', fontWeight: 800, color: 'var(--color-text-primary)' }}>
-              {metrics.highlightsCreated}
+              <AnimatedNumber value={metrics.highlightsCreated} />
             </div>
             <div style={{ fontSize: '0.78rem', color: 'var(--color-text-muted)', marginTop: '0.35rem' }}>
-              Highlights Studio preview active
+              Highlights Studio workspace
             </div>
           </div>
 
           {/* Card 4: Study Materials */}
-          <div className="lumio-card" style={{ padding: '1.5rem' }}>
+          <div className="lumio-card lumio-stat-card" style={{ padding: '1.5rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
               <span style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--color-text-secondary)' }}>
                 Study Materials
@@ -247,8 +324,9 @@ const Dashboard = ({ videoHistory = [] }) => {
                   width: '38px',
                   height: '38px',
                   borderRadius: '10px',
-                  background: 'rgba(167, 139, 250, 0.2)',
-                  color: 'var(--color-lavender)',
+                  background: 'rgba(212, 168, 83, 0.12)',
+                  border: '1px solid rgba(212, 168, 83, 0.22)',
+                  color: 'var(--color-primary-highlight, #F5C96A)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -258,7 +336,7 @@ const Dashboard = ({ videoHistory = [] }) => {
               </div>
             </div>
             <div style={{ fontSize: '2.2rem', fontWeight: 800, color: 'var(--color-text-primary)' }}>
-              {metrics.studyNotes}
+              <AnimatedNumber value={metrics.studyNotes} />
             </div>
             <div style={{ fontSize: '0.78rem', color: 'var(--color-text-muted)', marginTop: '0.35rem' }}>
               Notes, Flashcards & Quizzes saved
@@ -271,7 +349,9 @@ const Dashboard = ({ videoHistory = [] }) => {
       <section>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
           <div>
-            <h2 style={{ fontSize: '1.45rem', fontWeight: 700 }}>Recent Processed Videos</h2>
+            <h2 style={{ fontSize: '1.45rem', fontWeight: 700, color: 'var(--color-text-primary)' }}>
+              Recent Processed Videos
+            </h2>
             <p style={{ fontSize: '0.88rem', color: 'var(--color-text-secondary)' }}>
               Access transcripts, summaries, and learning sets directly.
             </p>
@@ -282,6 +362,7 @@ const Dashboard = ({ videoHistory = [] }) => {
               style={{
                 fontSize: '0.9rem',
                 fontWeight: 600,
+                color: 'var(--color-primary)',
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '0.35rem',
@@ -297,37 +378,42 @@ const Dashboard = ({ videoHistory = [] }) => {
           <div
             className="lumio-card"
             style={{
-              padding: '3rem 1.5rem',
+              padding: '3.5rem 1.75rem',
               textAlign: 'center',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              gap: '1rem',
+              justifyContent: 'center',
+              background: 'var(--color-surface)',
+              border: '1px solid var(--color-border)',
             }}
           >
             <div
               style={{
-                width: '64px',
-                height: '64px',
+                width: '60px',
+                height: '60px',
                 borderRadius: '50%',
-                background: 'var(--color-primary-light)',
+                background: 'var(--color-muted-gold, #292318)',
+                border: '1px solid rgba(212, 168, 83, 0.3)',
                 color: 'var(--color-primary)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
+                marginBottom: '1.25rem',
+                boxShadow: '0 4px 16px -2px var(--color-primary-glow)',
               }}
             >
-              <UploadCloud size={30} />
+              <Film size={26} />
             </div>
-            <div>
-              <h3 style={{ fontSize: '1.2rem', marginBottom: '0.35rem' }}>No videos processed yet</h3>
-              <p style={{ maxWidth: '420px', color: 'var(--color-text-secondary)', fontSize: '0.92rem' }}>
-                Upload an MP4, MOV, MKV or WebM video to automatically generate timestamped transcripts and AI study materials.
-              </p>
-            </div>
-            <Link to="/upload" className="lumio-btn-primary" style={{ marginTop: '0.5rem' }}>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.45rem', color: 'var(--color-text-primary)' }}>
+              No videos processed yet
+            </h3>
+            <p style={{ maxWidth: '440px', color: 'var(--color-text-secondary)', fontSize: '0.95rem', lineHeight: 1.6, marginBottom: '1.5rem' }}>
+              Upload an MP4, MOV, MKV or WebM video to automatically generate timestamped speech transcripts, AI summaries, and interactive flashcards.
+            </p>
+            <Link to="/upload" className="lumio-btn-primary" style={{ padding: '0.7rem 1.5rem' }}>
               <UploadCloud size={17} />
-              <span>Upload Your First Video</span>
+              <span>Summarize a Video</span>
             </Link>
           </div>
         ) : (
@@ -341,7 +427,7 @@ const Dashboard = ({ videoHistory = [] }) => {
             {recentVideos.map((video) => (
               <div
                 key={video.video_id}
-                className="lumio-card"
+                className="lumio-card lumio-card-interactive"
                 style={{
                   padding: '1.35rem',
                   display: 'flex',
@@ -351,41 +437,125 @@ const Dashboard = ({ videoHistory = [] }) => {
                 }}
               >
                 <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem', marginBottom: '0.75rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                  {/* Thumbnail / Video Preview Header */}
+                  {video.thumbnail ? (
+                    <div
+                      style={{
+                        position: 'relative',
+                        height: '140px',
+                        width: '100%',
+                        borderRadius: 'var(--radius-sm)',
+                        overflow: 'hidden',
+                        marginBottom: '0.85rem',
+                        border: '1px solid var(--color-border)',
+                      }}
+                    >
+                      <img
+                        src={video.thumbnail}
+                        alt={video.filename}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      />
+                      {video.duration && (
+                        <span
+                          style={{
+                            position: 'absolute',
+                            bottom: '8px',
+                            right: '8px',
+                            background: 'rgba(16, 16, 16, 0.85)',
+                            color: '#FAF7F0',
+                            fontSize: '0.72rem',
+                            padding: '0.15rem 0.45rem',
+                            borderRadius: '4px',
+                            fontWeight: 600,
+                            fontFamily: 'var(--font-mono)',
+                          }}
+                        >
+                          {video.duration}
+                        </span>
+                      )}
+                    </div>
+                  ) : (
+                    <div
+                      style={{
+                        height: '96px',
+                        width: '100%',
+                        borderRadius: 'var(--radius-sm)',
+                        background: 'linear-gradient(135deg, var(--color-surface-hover) 0%, var(--color-bg) 100%)',
+                        border: '1px solid var(--color-border)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        marginBottom: '0.85rem',
+                        position: 'relative',
+                      }}
+                    >
                       <div
                         style={{
-                          width: '36px',
-                          height: '36px',
-                          borderRadius: '8px',
-                          background: 'var(--color-bg)',
-                          border: '1px solid var(--color-border)',
+                          width: '40px',
+                          height: '40px',
+                          borderRadius: '50%',
+                          background: 'var(--color-primary-light)',
+                          border: '1px solid rgba(212, 168, 83, 0.25)',
+                          color: 'var(--color-primary)',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          color: 'var(--color-lavender)',
                         }}
                       >
-                        <Film size={18} />
+                        <Film size={20} />
                       </div>
-                      <span
-                        className={`lumio-badge ${video.summary_generated ? 'lumio-badge-success' : 'lumio-badge-primary'}`}
-                      >
-                        {video.summary_generated ? 'Summarized' : 'Processed'}
-                      </span>
+                      {video.duration && (
+                        <span
+                          style={{
+                            position: 'absolute',
+                            bottom: '6px',
+                            right: '8px',
+                            background: 'rgba(16, 16, 16, 0.85)',
+                            color: '#FAF7F0',
+                            fontSize: '0.72rem',
+                            padding: '0.15rem 0.45rem',
+                            borderRadius: '4px',
+                            fontWeight: 600,
+                            fontFamily: 'var(--font-mono)',
+                          }}
+                        >
+                          {video.duration}
+                        </span>
+                      )}
                     </div>
+                  )}
 
-                    <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', fontFamily: 'var(--font-mono)' }}>
+                  {/* Status & Language Row */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.65rem' }}>
+                    <span
+                      className={`lumio-badge ${video.summary_generated ? 'lumio-badge-success' : 'lumio-badge-primary'}`}
+                      style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}
+                    >
+                      {video.summary_generated ? (
+                        <>
+                          <CheckCircle2 size={12} />
+                          <span>Summarized</span>
+                        </>
+                      ) : (
+                        <>
+                          <Clock size={12} />
+                          <span>Transcribed</span>
+                        </>
+                      )}
+                    </span>
+
+                    <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', fontFamily: 'var(--font-mono)', fontWeight: 600 }}>
                       {video.language ? video.language.toUpperCase() : 'EN'}
                     </span>
                   </div>
 
+                  {/* Video Title */}
                   <h3
                     style={{
                       fontSize: '1.05rem',
                       fontWeight: 700,
                       color: 'var(--color-text-primary)',
-                      marginBottom: '0.5rem',
+                      marginBottom: '0.45rem',
                       lineHeight: 1.35,
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
@@ -396,12 +566,13 @@ const Dashboard = ({ videoHistory = [] }) => {
                     {video.filename}
                   </h3>
 
+                  {/* Summary Snippet or Status */}
                   {video.summary ? (
                     <p
                       style={{
                         fontSize: '0.85rem',
                         color: 'var(--color-text-secondary)',
-                        lineHeight: 1.45,
+                        lineHeight: 1.48,
                         display: '-webkit-box',
                         WebkitLineClamp: 2,
                         WebkitBoxOrient: 'vertical',
@@ -417,6 +588,7 @@ const Dashboard = ({ videoHistory = [] }) => {
                   )}
                 </div>
 
+                {/* Card Footer Actions */}
                 <div
                   style={{
                     display: 'flex',
@@ -428,12 +600,12 @@ const Dashboard = ({ videoHistory = [] }) => {
                 >
                   <button
                     type="button"
-                    onClick={() => navigate('/study')}
+                    onClick={() => navigate(`/study/${video.video_id}`)}
                     style={{
                       background: 'transparent',
                       color: 'var(--color-primary)',
-                      fontWeight: 600,
-                      fontSize: '0.85rem',
+                      fontWeight: 700,
+                      fontSize: '0.86rem',
                       display: 'inline-flex',
                       alignItems: 'center',
                       gap: '0.35rem',
@@ -444,21 +616,27 @@ const Dashboard = ({ videoHistory = [] }) => {
                     <ArrowRight size={14} />
                   </button>
 
-                  {video.summary && (
-                    <button
-                      type="button"
-                      onClick={() => copyToClipboard(video.summary)}
-                      title="Copy Summary"
-                      style={{
-                        background: 'transparent',
-                        color: 'var(--color-text-muted)',
-                        padding: '0.3rem',
-                        borderRadius: '4px',
-                      }}
-                    >
-                      <Copy size={16} />
-                    </button>
-                  )}
+                  <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
+                    {video.summary && (
+                      <button
+                        type="button"
+                        onClick={() => copyToClipboard(video.summary)}
+                        title="Copy Summary"
+                        style={{
+                          background: 'var(--color-surface-hover)',
+                          color: 'var(--color-text-secondary)',
+                          border: '1px solid var(--color-border)',
+                          padding: '0.35rem 0.5rem',
+                          borderRadius: '4px',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <Copy size={14} />
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}
@@ -466,10 +644,12 @@ const Dashboard = ({ videoHistory = [] }) => {
         )}
       </section>
 
-      {/* Feature Capabilities Overview Grid */}
+      {/* Feature Capabilities Overview Grid - Obsidian Gold Styled */}
       <section>
         <div style={{ marginBottom: '1.25rem' }}>
-          <h2 style={{ fontSize: '1.45rem', fontWeight: 700 }}>Platform Capabilities</h2>
+          <h2 style={{ fontSize: '1.45rem', fontWeight: 700, color: 'var(--color-text-primary)' }}>
+            Platform Capabilities
+          </h2>
           <p style={{ fontSize: '0.88rem', color: 'var(--color-text-secondary)' }}>
             Everything you need to turn raw media into structured mastery.
           </p>
@@ -482,13 +662,14 @@ const Dashboard = ({ videoHistory = [] }) => {
             gap: '1.25rem',
           }}
         >
-          <div className="lumio-card" style={{ padding: '1.5rem' }}>
+          <div className="lumio-card lumio-feature-card" style={{ padding: '1.5rem' }}>
             <div
               style={{
                 width: '42px',
                 height: '42px',
                 borderRadius: '12px',
                 background: 'var(--color-primary-light)',
+                border: '1px solid rgba(212, 168, 83, 0.25)',
                 color: 'var(--color-primary)',
                 display: 'flex',
                 alignItems: 'center',
@@ -498,20 +679,23 @@ const Dashboard = ({ videoHistory = [] }) => {
             >
               <FileText size={22} />
             </div>
-            <h3 style={{ fontSize: '1.1rem', marginBottom: '0.45rem' }}>AI Video Summaries</h3>
+            <h3 style={{ fontSize: '1.1rem', marginBottom: '0.45rem', color: 'var(--color-text-primary)' }}>
+              AI Video Summaries
+            </h3>
             <p style={{ fontSize: '0.88rem', lineHeight: 1.5, color: 'var(--color-text-secondary)' }}>
               Distill hours of video lectures, webinars, or tutorials into crystal-clear executive summaries and timestamped key moments.
             </p>
           </div>
 
-          <div className="lumio-card" style={{ padding: '1.5rem' }}>
+          <div className="lumio-card lumio-feature-card" style={{ padding: '1.5rem' }}>
             <div
               style={{
                 width: '42px',
                 height: '42px',
                 borderRadius: '12px',
-                background: 'rgba(56, 189, 248, 0.15)',
-                color: '#38BDF8',
+                background: 'var(--color-primary-light)',
+                border: '1px solid rgba(212, 168, 83, 0.25)',
+                color: 'var(--color-primary)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -520,20 +704,23 @@ const Dashboard = ({ videoHistory = [] }) => {
             >
               <BookOpen size={22} />
             </div>
-            <h3 style={{ fontSize: '1.1rem', marginBottom: '0.45rem' }}>AI Study Space</h3>
+            <h3 style={{ fontSize: '1.1rem', marginBottom: '0.45rem', color: 'var(--color-text-primary)' }}>
+              AI Study Space
+            </h3>
             <p style={{ fontSize: '0.88rem', lineHeight: 1.5, color: 'var(--color-text-secondary)' }}>
               Interactive workspace with markdown study notes, 3D flip flashcards, concept revision sheets, and self-scoring quizzes.
             </p>
           </div>
 
-          <div className="lumio-card" style={{ padding: '1.5rem' }}>
+          <div className="lumio-card lumio-feature-card" style={{ padding: '1.5rem' }}>
             <div
               style={{
                 width: '42px',
                 height: '42px',
                 borderRadius: '12px',
-                background: 'rgba(167, 139, 250, 0.2)',
-                color: 'var(--color-lavender)',
+                background: 'var(--color-primary-light)',
+                border: '1px solid rgba(212, 168, 83, 0.25)',
+                color: 'var(--color-primary)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -542,20 +729,23 @@ const Dashboard = ({ videoHistory = [] }) => {
             >
               <MessageSquareText size={22} />
             </div>
-            <h3 style={{ fontSize: '1.1rem', marginBottom: '0.45rem' }}>Ask the Video</h3>
+            <h3 style={{ fontSize: '1.1rem', marginBottom: '0.45rem', color: 'var(--color-text-primary)' }}>
+              Ask the Video
+            </h3>
             <p style={{ fontSize: '0.88rem', lineHeight: 1.5, color: 'var(--color-text-secondary)' }}>
               Chat directly with any processed video. Ask questions, seek clarification, and receive answers anchored directly to the transcript.
             </p>
           </div>
 
-          <div className="lumio-card" style={{ padding: '1.5rem' }}>
+          <div className="lumio-card lumio-feature-card" style={{ padding: '1.5rem' }}>
             <div
               style={{
                 width: '42px',
                 height: '42px',
                 borderRadius: '12px',
-                background: 'rgba(245, 158, 11, 0.15)',
-                color: '#F59E0B',
+                background: 'var(--color-surface-hover)',
+                border: '1px solid var(--color-border)',
+                color: 'var(--color-primary-highlight, #F5C96A)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -564,7 +754,9 @@ const Dashboard = ({ videoHistory = [] }) => {
             >
               <Sparkles size={22} />
             </div>
-            <h3 style={{ fontSize: '1.1rem', marginBottom: '0.45rem' }}>Highlights Studio</h3>
+            <h3 style={{ fontSize: '1.1rem', marginBottom: '0.45rem', color: 'var(--color-text-primary)' }}>
+              Highlights Studio
+            </h3>
             <p style={{ fontSize: '0.88rem', lineHeight: 1.5, color: 'var(--color-text-secondary)' }}>
               Automated scene and topic segmentation to extract pivotal moments, formulas, and conclusions from long-form video.
             </p>

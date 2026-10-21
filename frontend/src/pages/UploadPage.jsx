@@ -365,6 +365,26 @@ const UploadPage = ({ setVideoHistory }) => {
                 <p style={{ color: 'var(--color-text-muted)', fontSize: '0.82rem', marginTop: '0.5rem' }}>
                   This may take 15–45 seconds depending on video length.
                 </p>
+                <div
+                  style={{
+                    width: '260px',
+                    height: '4px',
+                    borderRadius: '999px',
+                    background: 'var(--color-border)',
+                    overflow: 'hidden',
+                    margin: '0.85rem auto 0',
+                  }}
+                >
+                  <div
+                    className="lumio-progress-bar-glow"
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      background: 'var(--gradient-primary)',
+                      borderRadius: '999px',
+                    }}
+                  />
+                </div>
               </div>
             </div>
           )}
@@ -374,7 +394,7 @@ const UploadPage = ({ setVideoHistory }) => {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           {/* Success Banner */}
           <div
-            className="lumio-card"
+            className="lumio-card lumio-success-pop"
             style={{
               padding: '1.5rem 1.75rem',
               display: 'flex',
