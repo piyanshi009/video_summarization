@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Moon, Sun, Menu, X, Sparkles, Upload } from 'lucide-react';
+import { Search, Moon, Sun, Menu, X, Sparkles } from 'lucide-react';
 
 const TopNav = ({ toggleMobileMenu, isMobileOpen }) => {
   const navigate = useNavigate();
@@ -134,22 +134,6 @@ const TopNav = ({ toggleMobileMenu, isMobileOpen }) => {
 
       {/* Right: Actions & Theme toggle */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
-        <button
-          type="button"
-          onClick={() => navigate('/upload')}
-          className="lumio-btn-primary"
-          style={{
-            padding: '0.5rem 1rem',
-            fontSize: '0.88rem',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '0.45rem',
-          }}
-        >
-          <Upload size={15} />
-          <span>Upload</span>
-        </button>
-
         <button
           type="button"
           onClick={toggleTheme}

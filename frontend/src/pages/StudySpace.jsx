@@ -479,10 +479,8 @@ function StudySpace({ videoHistory = [] }) {
                 {/* Tab Specific Viewers */}
                 {activeTab === 'notes' || activeTab === 'revision' ? (
                   <div
+                    className="lumio-study-markdown"
                     style={{
-                      lineHeight: 1.75,
-                      fontSize: '1.02rem',
-                      color: 'var(--color-text-primary)',
                       maxWidth: '820px',
                     }}
                   >
@@ -491,7 +489,11 @@ function StudySpace({ videoHistory = [] }) {
                     </ReactMarkdown>
                   </div>
                 ) : activeTab === 'flashcards' ? (
-                  <FlashcardViewer rawContent={content[activeTab]} />
+                  <FlashcardViewer
+                    rawContent={content[activeTab]}
+                    onRegenerate={() => handleGenerate('flashcards')}
+                    loading={loading}
+                  />
                 ) : activeTab === 'quiz' ? (
                   <QuizViewer
                     rawContent={content[activeTab]}

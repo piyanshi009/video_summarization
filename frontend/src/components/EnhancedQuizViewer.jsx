@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -296,6 +296,13 @@ const EnhancedQuizViewer = ({ rawContent, onRegenerate, loading = false }) => {
   // answers map: { [questionIdx]: { selectedOption, isSubmitted, isRevealed, selfScore } }
   const [answers, setAnswers] = useState({});
   const [showResults, setShowResults] = useState(false);
+
+  // Reset quiz progress when rawContent changes (e.g. video switch or regeneration)
+  useEffect(() => {
+    setCurrentIndex(0);
+    setAnswers({});
+    setShowResults(false);
+  }, [rawContent]);
 
   const quiz = parseQuiz(rawContent || '');
 
@@ -1068,7 +1075,7 @@ const EnhancedQuizViewer = ({ rawContent, onRegenerate, loading = false }) => {
                         transition: 'all 0.15s ease',
                       }}
                     >
-                      ✓ Got it right (+1)
+                      ✓ I got it right
                     </button>
 
                     <button
@@ -1078,9 +1085,9 @@ const EnhancedQuizViewer = ({ rawContent, onRegenerate, loading = false }) => {
                       style={{
                         padding: '0.65rem 1.25rem',
                         borderRadius: '8px',
-                        border: '2px solid #6B7280',
-                        background: currentAnswer.selfScore === 0 ? '#6B7280' : '#F3F4F6',
-                        color: currentAnswer.selfScore === 0 ? '#fff' : '#374151',
+                        border: '2px solid #EF4444',
+                        background: currentAnswer.selfScore === 0 ? '#EF4444' : 'rgba(239, 68, 68, 0.08)',
+                        color: currentAnswer.selfScore === 0 ? '#fff' : '#EF4444',
                         fontWeight: 700,
                         fontSize: '0.95rem',
                         cursor: 'pointer',
@@ -1090,7 +1097,7 @@ const EnhancedQuizViewer = ({ rawContent, onRegenerate, loading = false }) => {
                         transition: 'all 0.15s ease',
                       }}
                     >
-                      ✗ Need to review (0)
+                      ✗ I got it wrong
                     </button>
 
                     {currentAnswer.selfScore !== undefined && (

@@ -262,3 +262,124 @@ input:focus, select:focus, textarea:focus {
   background: rgba(148, 163, 184, 0.15);
   color: var(--color-text-secondary);
 }
+
+/* Polish for AI Study Space & Markdown Rendering */
+.lumio-study-markdown {
+  text-align: left;
+  line-height: 1.75;
+  color: var(--color-text-primary);
+  font-size: 1.02rem;
+}
+
+.lumio-study-markdown h1,
+.lumio-study-markdown h2,
+.lumio-study-markdown h3,
+.lumio-study-markdown h4,
+.lumio-study-markdown h5,
+.lumio-study-markdown h6 {
+  text-align: left;
+  color: var(--color-text-primary);
+  font-weight: 700;
+  line-height: 1.35;
+  margin-top: 1.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.lumio-study-markdown h1 {
+  font-size: 1.65rem;
+  font-weight: 800;
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 0.5rem;
+  color: var(--color-lavender);
+}
+
+.lumio-study-markdown h2 {
+  font-size: 1.35rem;
+  color: var(--color-lavender);
+}
+
+.lumio-study-markdown h3 {
+  font-size: 1.15rem;
+}
+
+.lumio-study-markdown p {
+  text-align: left;
+  margin-top: 0;
+  margin-bottom: 1.15rem;
+  line-height: 1.75;
+}
+
+.lumio-study-markdown ul,
+.lumio-study-markdown ol {
+  text-align: left;
+  margin-top: 0.5rem;
+  margin-bottom: 1.25rem;
+  padding-left: 1.75rem;
+}
+
+.lumio-study-markdown ul {
+  list-style-type: disc;
+}
+
+.lumio-study-markdown ol {
+  list-style-type: decimal;
+}
+
+.lumio-study-markdown li {
+  text-align: left;
+  margin-bottom: 0.45rem;
+  line-height: 1.7;
+}
+
+.lumio-study-markdown li > ul,
+.lumio-study-markdown li > ol {
+  margin-top: 0.35rem;
+  margin-bottom: 0.35rem;
+  padding-left: 1.5rem;
+}
+
+.lumio-study-markdown hr {
+  border: none;
+  border-top: 1px solid var(--color-border);
+  margin: 2rem 0;
+}
+
+.lumio-study-markdown blockquote {
+  border-left: 3px solid var(--color-primary);
+  background: var(--color-bg);
+  padding: 0.75rem 1.25rem;
+  margin: 1.25rem 0;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  color: var(--color-text-secondary);
+  font-style: italic;
+  text-align: left;
+}
+
+.lumio-study-markdown code {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  padding: 0.15rem 0.4rem;
+  font-family: var(--font-mono);
+  font-size: 0.88em;
+}
+
+.lumio-study-markdown pre {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 1rem;
+  overflow-x: auto;
+  margin: 1.25rem 0;
+}
+
+.lumio-study-markdown strong,
+.lumio-study-markdown b {
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.lumio-spin {
+  animation: spin 1s linear infinite;
+}
+
