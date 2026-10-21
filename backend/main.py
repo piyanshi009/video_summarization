@@ -186,3 +186,27 @@ async def generate_study(request: dict):
     prompt = prompts.get(task, f"Summarize the following transcript:\n{transcript_text}")
     content = generate_content(prompt)
     return {"content": content}
+
+@app.post("/chat")
+async def chat_with_video(request: dict):
+    video_id = request.get("video_id")
+    message = request.get("message")
+    if not video_id or not message:
+        raise HTTPException(status_code=400, detail="video_id and message are required")
+    transcript_path = OUTPUT_DIR / f"{video_id}_transcript.json"
+    if not transcript_path.exists():
+        raise HTTPException(status_code=404, detail="Transcript not found for this video")
+    with transcript_path.open() as f:
+        trans = json.load(f)
+    segments = trans.get("segments", [])
+    transcript_text = "\n".join(f"[{seg['start']}s - {seg['end']}s] {seg['text']}" for seg in segments)
+    prompt = (
+        "You are Lumio AI's intelligent video assistant. Answer the user's question accurately based on the video transcript.\n"
+        "Be helpful, concise, and reference timestamps or context where appropriate.\n"
+        "Do not invent facts absent from the transcript.\n\n"
+        f"Video Transcript:\n{transcript_text[:25000]}\n\n"
+        f"User Question: {message}\n\nAnswer:"
+    )
+    reply = generate_content(prompt)
+    return {"reply": reply}
+

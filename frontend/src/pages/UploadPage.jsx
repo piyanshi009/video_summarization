@@ -1,12 +1,28 @@
 import React, { useState } from 'react';
-import { Upload, FileVideo, X, ClipboardCheck, List, BookOpen, Clock } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { 
+  UploadCloud, 
+  FileVideo, 
+  X, 
+  Copy, 
+  Download, 
+  CheckCircle2, 
+  AlertCircle, 
+  BookOpen, 
+  Clock, 
+  Sparkles,
+  RefreshCw,
+  FileText
+} from 'lucide-react';
 
 const UploadPage = ({ setVideoHistory }) => {
   const [file, setFile] = useState(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [loadingStage, setLoadingStage] = useState('');
   const [result, setResult] = useState(null);
   const [dragOver, setDragOver] = useState(false);
+  const [activeResultTab, setActiveResultTab] = useState('summary'); // 'summary' or 'transcript'
 
   const supportedTypes = ['video/mp4', 'video/quicktime', 'video/x-matroska', 'video/webm'];
   const maxFileSize = 500 * 1024 * 1024; // 500 MB
@@ -14,20 +30,25 @@ const UploadPage = ({ setVideoHistory }) => {
   const handleFiles = (files) => {
     const selected = files[0];
     if (!selected) return;
+
     const lowerName = selected.name.toLowerCase();
     const isSupportedExt = ['.mp4', '.mov', '.mkv', '.webm'].some(ext => lowerName.endsWith(ext));
+
     if (!supportedTypes.includes(selected.type) && !isSupportedExt) {
       setError('Unsupported file type. Please upload MP4, MOV, MKV or WebM.');
       setFile(null);
       return;
     }
+
     if (selected.size > maxFileSize) {
-      setError('File is too large (max 500 MB).');
+      setError('File is too large. Maximum supported file size is 500 MB.');
       setFile(null);
       return;
     }
+
     setError('');
     setFile(selected);
+    setResult(null);
   };
 
   const onDrop = (e) => {
@@ -50,304 +71,522 @@ const UploadPage = ({ setVideoHistory }) => {
   const removeFile = () => {
     setFile(null);
     setResult(null);
+    setError('');
   };
 
-  const upload = async () => {
-    if (!file) return;
+  const handleUpload = async () => {
+    if (!file || loading) return;
     setLoading(true);
     setError('');
+    setLoadingStage('Uploading video and extracting audio stream…');
+
     try {
       const form = new FormData();
       form.append('file', file);
+
+      // Simulating stage message updates for genuine pipeline awareness
+      const stageTimer1 = setTimeout(() => {
+        setLoadingStage('Transcribing speech with local Whisper model…');
+      }, 3500);
+
+      const stageTimer2 = setTimeout(() => {
+        setLoadingStage('Generating structured AI summary with Gemini…');
+      }, 9000);
+
       const response = await fetch('http://127.0.0.1:8000/upload', {
         method: 'POST',
         body: form,
       });
-      if (!response.ok) {
-        const err = await response.json();
-        throw new Error(err.detail || 'Upload failed');
+
+      clearTimeout(stageTimer1);
+      clearTimeout(stageTimer2);
+
+      let data;
+      try {
+        data = await response.json();
+      } catch {
+        throw new Error('Invalid server response. Please make sure FastAPI backend is running.');
       }
-      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.detail || 'Upload processing failed.');
+      }
+
       setResult(data);
       if (setVideoHistory) {
-        setVideoHistory(prev => [...prev, data]);
+        setVideoHistory((prev) => {
+          // Avoid duplicate entries
+          const filtered = prev.filter(v => v.video_id !== data.video_id);
+          return [...filtered, data];
+        });
       }
     } catch (err) {
-      setError(err.message);
+      setError(err.message || 'Something went wrong during video processing.');
     } finally {
       setLoading(false);
+      setLoadingStage('');
     }
-  };
-
-  const formatSize = (size) => `${(size / (1024 * 1024)).toFixed(2)} MB`;
-
-  // Simple markdown renderer for Gemini summary
-  const renderMarkdown = (text) => {
-    if (!text) return null;
-    const lines = text.split('\n');
-    const elements = [];
-    let listItems = [];
-    lines.forEach((rawLine, idx) => {
-      const line = rawLine.trim();
-      if (!line) return;
-      // Heading detection: line wrapped in **
-      if (/^\*\*.+\*\*$/.test(line)) {
-        if (listItems.length) {
-          elements.push(
-            <ul key={'list-' + idx} style={{ margin: '0.5rem 0', paddingLeft: '1.2rem' }}>
-              {listItems.map((item, i) => (
-                <li key={i} style={{ marginBottom: '0.3rem' }} dangerouslySetInnerHTML={{ __html: item }} />
-              ))}
-            </ul>
-          );
-          listItems = [];
-        }
-        const heading = line.replace(/^\*\*/, '').replace(/\*\*$/, '');
-        elements.push(
-          <h4 key={'h' + idx} style={{ margin: '0.8rem 0', color: 'var(--color-primary)' }}>{heading}</h4>
-        );
-      } else if (/^[\-\*]\s+/.test(line)) {
-        const item = line.replace(/^[\-\*]\s+/, '').replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-        listItems.push(item);
-      } else {
-        if (listItems.length) {
-          elements.push(
-            <ul key={'list-' + idx} style={{ margin: '0.5rem 0', paddingLeft: '1.2rem' }}>
-              {listItems.map((item, i) => (
-                <li key={i} style={{ marginBottom: '0.3rem' }} dangerouslySetInnerHTML={{ __html: item }} />
-              ))}
-            </ul>
-          );
-          listItems = [];
-        }
-        const html = line.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-        elements.push(
-          <p key={'p' + idx} style={{ margin: '0.4rem 0', color: 'var(--color-text-primary)' }} dangerouslySetInnerHTML={{ __html: html }} />
-        );
-      }
-    });
-    if (listItems.length) {
-      elements.push(
-        <ul key={'list-final'} style={{ margin: '0.5rem 0', paddingLeft: '1.2rem' }}>
-          {listItems.map((item, i) => (
-            <li key={i} style={{ marginBottom: '0.3rem' }} dangerouslySetInnerHTML={{ __html: item }} />
-          ))}
-        </ul>
-      );
-    }
-    return elements;
   };
 
   const copyToClipboard = async (text) => {
+    if (!text) return;
     try {
       await navigator.clipboard.writeText(text);
-      alert('Copied to clipboard');
-    } catch (e) {
-      console.error(e);
-      alert('Failed to copy');
+      alert('Copied to clipboard!');
+    } catch (err) {
+      console.error(err);
     }
   };
 
-  const downloadSummary = (summary) => {
-    const blob = new Blob([summary], { type: 'text/plain;charset=utf-8' });
+  const downloadText = (text, filename) => {
+    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'summary.txt';
-    a.click();
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
     URL.revokeObjectURL(url);
   };
 
-  return (
-    <section style={{ maxWidth: '720px', margin: '2rem auto', padding: '0 1rem', textAlign: 'center' }}>
-      <h2 style={{ color: 'var(--color-primary)', marginBottom: '0.5rem' }}>Create your video summary</h2>
-      <p style={{ color: 'var(--color-text-secondary)', marginBottom: '2rem' }}>
-        Transform long videos into summaries, notes, and key moments.
-      </p>
+  const formatSize = (bytes) => {
+    if (!bytes) return '0 B';
+    const mb = bytes / (1024 * 1024);
+    return `${mb.toFixed(2)} MB`;
+  };
 
-      {/* Upload area */}
-      {!result && (
-        <div
-          onDrop={onDrop}
-          onDragOver={onDragOver}
-          onDragLeave={onDragLeave}
-          onClick={() => document.getElementById('fileInput').click()}
-          style={{
-            border: `2px ${dragOver ? 'solid' : 'dashed'} var(--color-primary)`,
-            borderRadius: 'var(--radius)',
-            padding: '2rem',
-            cursor: 'pointer',
-            background: 'var(--color-surface)',
-            transition: 'border-color 0.2s, background 0.2s',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '1rem',
-            maxWidth: '500px',
-            margin: '0 auto',
-          }}
-        >
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.8rem' }}>
-            <div style={{ background: 'rgba(109,60,245,0.1)', borderRadius: '50%', padding: '0.6rem' }}>
-              <Upload size={48} color="var(--color-primary)" />
+  return (
+    <div className="page-container" style={{ maxWidth: '1020px' }}>
+      {/* Header */}
+      <div style={{ marginBottom: '2rem' }}>
+        <h1 style={{ fontSize: '2.1rem', fontWeight: 800, marginBottom: '0.4rem' }}>
+          Upload & Process Video
+        </h1>
+        <p style={{ color: 'var(--color-text-secondary)', fontSize: '1rem' }}>
+          Upload any lecture, webinar, or recording to extract transcriptions, structured summaries, and learning tools.
+        </p>
+      </div>
+
+      {!result ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          {/* Drag & Drop Zone */}
+          <div
+            onDrop={onDrop}
+            onDragOver={onDragOver}
+            onDragLeave={onDragLeave}
+            style={{
+              border: `2px dashed ${dragOver ? 'var(--color-primary)' : 'var(--color-border)'}`,
+              borderRadius: 'var(--radius-lg)',
+              background: dragOver ? 'var(--color-primary-light)' : 'var(--color-surface)',
+              padding: '3.5rem 2rem',
+              textAlign: 'center',
+              cursor: 'pointer',
+              transition: 'all var(--transition-normal)',
+              position: 'relative',
+              boxShadow: dragOver ? 'var(--shadow-glow)' : 'var(--shadow-sm)',
+            }}
+            onClick={() => document.getElementById('video-file-input')?.click()}
+          >
+            <input
+              id="video-file-input"
+              type="file"
+              accept=".mp4,.mov,.mkv,.webm,video/*"
+              style={{ display: 'none' }}
+              onChange={onFileChange}
+            />
+
+            <div
+              style={{
+                width: '68px',
+                height: '68px',
+                borderRadius: '50%',
+                background: 'var(--color-primary-light)',
+                color: 'var(--color-primary)',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginBottom: '1.25rem',
+                boxShadow: '0 4px 16px -2px var(--color-primary-glow)',
+              }}
+            >
+              <UploadCloud size={32} />
             </div>
-            <p style={{ color: 'var(--color-text-primary)', margin: 0, fontWeight: 500, fontSize: '1.1rem' }}>Drop your video here</p>
-            <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.9rem', margin: 0, textAlign: 'center' }}>
-              Drag and drop your file, or browse your computer
+
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.5rem', color: 'var(--color-text-primary)' }}>
+              Choose a video file or drag and drop here
+            </h3>
+
+            <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.92rem', marginBottom: '1.25rem' }}>
+              MP4, MOV, MKV, or WebM • Up to 500 MB per file
             </p>
+
+            <span
+              className="lumio-btn-secondary"
+              style={{
+                pointerEvents: 'none',
+                display: 'inline-flex',
+                fontSize: '0.88rem',
+                padding: '0.5rem 1.25rem',
+              }}
+            >
+              Browse Local Files
+            </span>
           </div>
 
-          <button
-            type="button"
+          {/* Error Message */}
+          {error && (
+            <div
+              style={{
+                padding: '1rem 1.25rem',
+                borderRadius: 'var(--radius)',
+                background: 'rgba(239, 68, 68, 0.12)',
+                border: '1px solid rgba(239, 68, 68, 0.3)',
+                color: '#EF4444',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.75rem',
+                fontSize: '0.95rem',
+              }}
+            >
+              <AlertCircle size={20} style={{ flexShrink: 0 }} />
+              <span>{error}</span>
+            </div>
+          )}
+
+          {/* Selected File Details Card */}
+          {file && (
+            <div
+              className="lumio-card"
+              style={{
+                padding: '1.25rem 1.5rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: '1rem',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                <div
+                  style={{
+                    width: '44px',
+                    height: '44px',
+                    borderRadius: '10px',
+                    background: 'var(--color-primary-light)',
+                    color: 'var(--color-primary)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                  }}
+                >
+                  <FileVideo size={22} />
+                </div>
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--color-text-primary)' }}>
+                    {file.name}
+                  </div>
+                  <div style={{ fontSize: '0.82rem', color: 'var(--color-text-muted)', marginTop: '0.15rem' }}>
+                    {formatSize(file.size)} • {file.type || 'video'}
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <button
+                  type="button"
+                  onClick={removeFile}
+                  disabled={loading}
+                  className="lumio-btn-secondary"
+                  style={{ padding: '0.5rem 1rem', fontSize: '0.88rem' }}
+                >
+                  <X size={15} />
+                  <span>Remove</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleUpload}
+                  disabled={loading}
+                  className="lumio-btn-primary"
+                  style={{
+                    padding: '0.65rem 1.5rem',
+                    fontSize: '0.95rem',
+                    opacity: loading ? 0.75 : 1,
+                  }}
+                >
+                  {loading ? (
+                    <>
+                      <RefreshCw size={17} className="spin-icon" style={{ animation: 'spin 1.2s linear infinite' }} />
+                      <span>Processing…</span>
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles size={17} />
+                      <span>Start Processing</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Processing Progress Status */}
+          {loading && (
+            <div
+              className="lumio-card"
+              style={{
+                padding: '2rem',
+                textAlign: 'center',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '1rem',
+              }}
+            >
+              <div
+                style={{
+                  width: '54px',
+                  height: '54px',
+                  borderRadius: '50%',
+                  border: '3px solid var(--color-border)',
+                  borderTopColor: 'var(--color-primary)',
+                  animation: 'spin 1s linear infinite',
+                }}
+              />
+              <div>
+                <h4 style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--color-text-primary)', marginBottom: '0.35rem' }}>
+                  Processing Your Video
+                </h4>
+                <p style={{ color: 'var(--color-lavender)', fontSize: '0.95rem', fontWeight: 600 }}>
+                  {loadingStage || 'Extracting speech and computing embeddings…'}
+                </p>
+                <p style={{ color: 'var(--color-text-muted)', fontSize: '0.82rem', marginTop: '0.5rem' }}>
+                  This may take 15–45 seconds depending on video length.
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+      ) : (
+        /* Result View Section */
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          {/* Success Banner */}
+          <div
+            className="lumio-card"
             style={{
-              marginTop: '1rem',
-              background: 'var(--color-primary)',
-              color: '#fff',
-              border: 'none',
-              padding: '0.6rem 1.2rem',
-              borderRadius: 'var(--radius)',
-              cursor: 'pointer',
+              padding: '1.5rem 1.75rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: '1rem',
+              background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(120, 85, 255, 0.08) 100%)',
+              borderColor: 'rgba(16, 185, 129, 0.35)',
             }}
           >
-            Browse Files
-          </button>
-          <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.85rem', margin: 0 }}>
-            Supported formats: MP4, MOV, MKV, WebM
-          </p>
-          <input
-            id="fileInput"
-            type="file"
-            accept=".mp4,.mov,.mkv,.webm"
-            style={{ display: 'none' }}
-            onChange={onFileChange}
-          />
-        </div>
-      )}
-
-      {/* Selected file view */}
-      {file && !result && (
-        <div style={{ marginTop: '1.5rem', textAlign: 'left', background: 'var(--color-surface)', padding: '1rem', borderRadius: 'var(--radius)', border: '1px solid var(--color-border)', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <FileVideo size={24} color="var(--color-primary)" />
-          <div style={{ flex: 1 }}>
-            <p style={{ margin: 0, color: 'var(--color-text-primary)' }}><strong>{file.name}</strong> ({formatSize(file.size)})</p>
-          </div>
-          <button onClick={removeFile} style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}>
-            <X size={20} color="var(--color-text-secondary)" />
-          </button>
-        </div>
-      )}
-
-      {/* Upload button */}
-      {file && !result && (
-        <button
-          type="button"
-          onClick={upload}
-          disabled={loading}
-          style={{
-            marginTop: '1rem',
-            background: 'var(--color-primary)',
-            color: '#fff',
-            border: 'none',
-            padding: '0.6rem 1.2rem',
-            borderRadius: 'var(--radius)',
-            cursor: loading ? 'not-allowed' : 'pointer',
-          }}
-        >
-          {loading ? 'Processing…' : 'Upload & Summarize'}
-        </button>
-      )}
-
-      {/* Error */}
-      {error && <p style={{ color: 'red', marginTop: '1rem' }}>{error}</p>}
-
-      {/* What you'll get */}
-      <section style={{ marginTop: '3rem', textAlign: 'left' }}>
-        <h3 style={{ color: 'var(--color-primary)', marginBottom: '1rem' }}>What you’ll get</h3>
-        <div className="grid grid-2" style={{ gap: '1rem' }}>
-          <div className="card">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <ClipboardCheck size={20} color="var(--color-primary)" />
-              <strong style={{ color: 'var(--color-text-primary)' }}>AI Summary</strong>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+              <div
+                style={{
+                  width: '42px',
+                  height: '42px',
+                  borderRadius: '50%',
+                  background: '#10B981',
+                  color: '#FFFFFF',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                }}
+              >
+                <CheckCircle2 size={24} />
+              </div>
+              <div>
+                <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--color-text-primary)' }}>
+                  Video Processed Successfully
+                </h3>
+                <div style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)', marginTop: '0.15rem' }}>
+                  {result.filename} • Language: {result.language?.toUpperCase() || 'EN'} • ID: {result.video_id?.slice(0, 10)}...
+                </div>
+              </div>
             </div>
-            <p style={{ color: 'var(--color-text-secondary)', marginTop: '0.5rem' }}>A concise overview with key take‑aways.</p>
-          </div>
-          <div className="card">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <List size={20} color="var(--color-primary)" />
-              <strong style={{ color: 'var(--color-text-primary)' }}>Timestamped Transcript</strong>
-            </div>
-            <p style={{ color: 'var(--color-text-secondary)', marginTop: '0.5rem' }}>Searchable transcript with timestamps.</p>
-          </div>
-          <div className="card">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <BookOpen size={20} color="var(--color-primary)" />
-              <strong style={{ color: 'var(--color-text-primary)' }}>Study Notes</strong>
-            </div>
-            <p style={{ color: 'var(--color-text-secondary)', marginTop: '0.5rem' }}>Bullet‑point notes for revision (coming soon).</p>
-          </div>
-          <div className="card">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Clock size={20} color="var(--color-primary)" />
-              <strong style={{ color: 'var(--color-text-primary)' }}>Key Moments</strong>
-            </div>
-            <p style={{ color: 'var(--color-text-secondary)', marginTop: '0.5rem' }}>Important sections highlighted (coming soon).</p>
-          </div>
-        </div>
-      </section>
 
-      {/* Result display */}
-      {result && (
-        <div style={{ marginTop: '2rem', textAlign: 'left' }}>
-          {/* Header with filename */}
-          <div style={{ padding: '0.8rem', background: 'var(--color-surface)', borderRadius: 'var(--radius)', border: '1px solid var(--color-border)', marginBottom: '1rem' }}>
-            <h3 style={{ margin: 0, color: 'var(--color-primary)' }}>{result.filename}</h3>
-            <p style={{ margin: '0.3rem 0 0', color: 'var(--color-text-secondary)' }}>Processing completed</p>
-          </div>
-
-          {/* Summary Card */}
-          <div className="card" style={{ padding: '1rem', background: 'var(--color-surface)', borderRadius: 'var(--radius)', border: '1px solid var(--color-border)' }}>
-            <h4 style={{ marginBottom: '0.5rem', color: 'var(--color-primary)' }}>Summary</h4>
-            <div>{renderMarkdown(result.summary)}</div>
-            <div style={{ marginTop: '0.8rem', display: 'flex', gap: '0.6rem' }}>
-              <button onClick={() => copyToClipboard(result.summary)} style={{ background: 'var(--color-primary)', color: '#fff', border: 'none', padding: '0.4rem 0.8rem', borderRadius: 'var(--radius)', cursor: 'pointer' }}>Copy Summary</button>
-              <button onClick={() => downloadSummary(result.summary)} style={{ background: 'var(--color-primary)', color: '#fff', border: 'none', padding: '0.4rem 0.8rem', borderRadius: 'var(--radius)', cursor: 'pointer' }}>Download Summary</button>
+            <div style={{ display: 'flex', gap: '0.75rem' }}>
+              <Link to="/study" className="lumio-btn-primary" style={{ padding: '0.55rem 1.25rem', fontSize: '0.88rem' }}>
+                <BookOpen size={16} />
+                <span>Open in Study Space</span>
+              </Link>
+              <button
+                type="button"
+                onClick={removeFile}
+                className="lumio-btn-secondary"
+                style={{ padding: '0.55rem 1.25rem', fontSize: '0.88rem' }}
+              >
+                Upload Another
+              </button>
             </div>
           </div>
 
-          {/* Transcript Card */}
-          <div className="card" style={{ marginTop: '1.5rem', padding: '1rem', background: 'var(--color-surface)', borderRadius: 'var(--radius)', border: '1px solid var(--color-border)' }}>
-            <h4 style={{ marginBottom: '0.5rem', color: 'var(--color-primary)' }}>Transcript</h4>
-            <div style={{ maxHeight: '300px', overflowY: 'auto', background: 'var(--color-bg)', padding: '0.8rem', borderRadius: 'var(--radius)' }}>
-              {Array.isArray(result.transcript) && result.transcript.length > 0 ? (
-                result.transcript.map((seg, idx) => (
-                  <p key={idx} style={{ margin: '0.2rem 0', color: 'var(--color-text-primary)' }}>
-                    <span style={{ fontWeight: '500', marginRight: '0.4rem' }}>[{seg.start}s - {seg.end}s]</span>{seg.text}
+          {/* Result Tabs (Summary vs Transcript) */}
+          <div style={{ display: 'flex', gap: '0.5rem', borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem' }}>
+            <button
+              type="button"
+              onClick={() => setActiveResultTab('summary')}
+              style={{
+                padding: '0.6rem 1.2rem',
+                borderRadius: 'var(--radius)',
+                background: activeResultTab === 'summary' ? 'var(--color-primary-light)' : 'transparent',
+                color: activeResultTab === 'summary' ? 'var(--color-primary)' : 'var(--color-text-secondary)',
+                fontWeight: 700,
+                fontSize: '0.92rem',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+              }}
+            >
+              <Sparkles size={17} />
+              <span>AI Summary</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveResultTab('transcript')}
+              style={{
+                padding: '0.6rem 1.2rem',
+                borderRadius: 'var(--radius)',
+                background: activeResultTab === 'transcript' ? 'var(--color-primary-light)' : 'transparent',
+                color: activeResultTab === 'transcript' ? 'var(--color-primary)' : 'var(--color-text-secondary)',
+                fontWeight: 700,
+                fontSize: '0.92rem',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+              }}
+            >
+              <Clock size={17} />
+              <span>Timestamped Transcript</span>
+            </button>
+          </div>
+
+          {/* Tab Content Display */}
+          <div
+            className="lumio-card"
+            style={{
+              padding: '2rem',
+              minHeight: '350px',
+            }}
+          >
+            {activeResultTab === 'summary' ? (
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+                  <h3 style={{ fontSize: '1.25rem', fontWeight: 700 }}>Executive AI Summary</h3>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <button
+                      type="button"
+                      onClick={() => copyToClipboard(result.summary)}
+                      className="lumio-btn-secondary"
+                      style={{ padding: '0.45rem 0.85rem', fontSize: '0.85rem' }}
+                    >
+                      <Copy size={15} />
+                      <span>Copy</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => downloadText(result.summary, `${result.filename || 'video'}_summary.txt`)}
+                      className="lumio-btn-secondary"
+                      style={{ padding: '0.45rem 0.85rem', fontSize: '0.85rem' }}
+                    >
+                      <Download size={15} />
+                      <span>Download</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div
+                  style={{
+                    lineHeight: 1.7,
+                    fontSize: '1rem',
+                    color: 'var(--color-text-primary)',
+                    whiteSpace: 'pre-wrap',
+                  }}
+                >
+                  {result.summary || 'No summary generated.'}
+                </div>
+              </div>
+            ) : (
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+                  <h3 style={{ fontSize: '1.25rem', fontWeight: 700 }}>Full Transcript Segments</h3>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const text = result.transcript?.segments
+                        ?.map((s) => `[${s.start}s - ${s.end}s] ${s.text}`)
+                        .join('\n') || '';
+                      downloadText(text, `${result.filename || 'video'}_transcript.txt`);
+                    }}
+                    className="lumio-btn-secondary"
+                    style={{ padding: '0.45rem 0.85rem', fontSize: '0.85rem' }}
+                  >
+                    <Download size={15} />
+                    <span>Download Transcript</span>
+                  </button>
+                </div>
+
+                {result.transcript?.segments && result.transcript.segments.length > 0 ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem', maxHeight: '500px', overflowY: 'auto' }}>
+                    {result.transcript.segments.map((seg, i) => (
+                      <div
+                        key={i}
+                        style={{
+                          padding: '0.75rem 1rem',
+                          borderRadius: '8px',
+                          background: 'var(--color-bg)',
+                          border: '1px solid var(--color-border-subtle)',
+                          display: 'flex',
+                          gap: '1rem',
+                          alignItems: 'flex-start',
+                        }}
+                      >
+                        <span
+                          style={{
+                            fontSize: '0.8rem',
+                            fontWeight: 700,
+                            color: 'var(--color-primary)',
+                            fontFamily: 'var(--font-mono)',
+                            padding: '0.2rem 0.5rem',
+                            background: 'var(--color-primary-light)',
+                            borderRadius: '4px',
+                            flexShrink: 0,
+                          }}
+                        >
+                          {Math.floor(seg.start)}s – {Math.floor(seg.end)}s
+                        </span>
+                        <p style={{ color: 'var(--color-text-primary)', fontSize: '0.95rem', margin: 0 }}>
+                          {seg.text}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p style={{ color: 'var(--color-text-secondary)' }}>
+                    No timestamped segments found in transcript.
                   </p>
-                ))
-              ) : (
-                <p style={{ color: 'var(--color-text-secondary)' }}>No transcript available.</p>
-              )}
-            </div>
+                )}
+              </div>
+            )}
           </div>
-
-          {/* Details Section */}
-          <div style={{ marginTop: '1rem' }}>
-            <ul style={{ color: 'var(--color-text-primary)', listStyle: 'none', paddingLeft: 0 }}>
-              <li><strong>Language:</strong> {result.language}</li>
-              <li><strong>Video ID:</strong> {result.video_id}</li>
-              <li><strong>Filename:</strong> {result.filename}</li>
-            </ul>
-          </div>
-
-          {/* Actions */}
-          <div style={{ marginTop: '1.5rem', display: 'flex', gap: '0.8rem' }}>
-            <button onClick={() => { setFile(null); setResult(null); }} style={{ background: 'var(--color-primary)', color: '#fff', border: 'none', padding: '0.5rem 1rem', borderRadius: 'var(--radius)', cursor: 'pointer' }}>Upload Another Video</button>
-          </div>
-
         </div>
       )}
 
-    </section >
+      <style>{`
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
+    </div>
   );
 };
 
