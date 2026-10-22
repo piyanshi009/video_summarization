@@ -43,7 +43,7 @@ const Sidebar = ({ isMobileOpen, closeMobileMenu }) => {
         className={`lumio-sidebar ${isMobileOpen ? 'open' : ''}`}
         style={{
           width: '260px',
-          background: 'var(--color-surface-elevated, #1B1B1B)',
+          background: 'var(--color-surface-elevated, #FFFFFF)',
           borderRight: '1px solid var(--color-border)',
           minHeight: '100vh',
           display: 'flex',
@@ -81,7 +81,7 @@ const Sidebar = ({ isMobileOpen, closeMobileMenu }) => {
               {/* Geometric Play/AI Icon */}
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M5 4L19 12L5 20V4Z" fill="currentColor" fillOpacity="0.9" />
-                <circle cx="17" cy="7" r="3" fill="var(--color-primary-highlight, #F5C96A)" />
+                <circle cx="17" cy="7" r="3" fill="var(--color-primary-highlight, #60A5FA)" />
               </svg>
             </div>
             <div>
@@ -96,7 +96,7 @@ const Sidebar = ({ isMobileOpen, closeMobileMenu }) => {
                   gap: '0.35rem',
                 }}
               >
-                Lumio <span style={{ color: 'var(--color-primary-highlight, #F5C96A)' }}>AI</span>
+                Lumio <span style={{ color: 'var(--color-primary)' }}>AI</span>
               </div>
               <div 
                 style={{ 
@@ -141,7 +141,7 @@ const Sidebar = ({ isMobileOpen, closeMobileMenu }) => {
                     padding: '0.7rem 0.85rem',
                     borderRadius: 'var(--radius-sm)',
                     background: isActive ? 'var(--gradient-primary)' : 'transparent',
-                    color: isActive ? 'var(--color-primary-text, #12100C)' : 'var(--color-text-secondary)',
+                    color: isActive ? 'var(--color-primary-text, #FFFFFF)' : 'var(--color-text-secondary)',
                     fontWeight: isActive ? 700 : 500,
                     fontSize: '0.92rem',
                     textDecoration: 'none',
@@ -155,7 +155,7 @@ const Sidebar = ({ isMobileOpen, closeMobileMenu }) => {
                       <item.icon 
                         size={19} 
                         style={{ 
-                          color: isActive ? 'var(--color-primary-text, #12100C)' : 'var(--color-primary)',
+                          color: isActive ? 'var(--color-primary-text, #FFFFFF)' : 'var(--color-primary)',
                           opacity: isActive ? 1 : 0.85,
                           flexShrink: 0,
                         }} 
@@ -167,8 +167,8 @@ const Sidebar = ({ isMobileOpen, closeMobileMenu }) => {
                             width: '5px',
                             height: '5px',
                             borderRadius: '50%',
-                            background: 'var(--color-primary-text, #12100C)',
-                            boxShadow: '0 0 8px var(--color-primary-text, #12100C)',
+                            background: 'var(--color-primary-text, #FFFFFF)',
+                            boxShadow: '0 0 8px var(--color-primary-glow)',
                           }} 
                         />
                       )}
@@ -193,7 +193,7 @@ const Sidebar = ({ isMobileOpen, closeMobileMenu }) => {
         >
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.45rem' }}>
             <span style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--color-text-primary)', display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
-              <Cpu size={15} color="var(--color-primary-highlight, #F5C96A)" />
+              <Cpu size={15} color="var(--color-primary)" />
               Local Engine
             </span>
             <span

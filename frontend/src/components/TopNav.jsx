@@ -10,7 +10,7 @@ const TopNav = ({ toggleMobileMenu, isMobileOpen }) => {
   const [isDark, setIsDark] = useState(() => {
     const stored = localStorage.getItem('theme');
     if (stored) return stored === 'dark';
-    return true; // default dark for futuristic midnight theme
+    return false; // default: light Arctic Blue theme
   });
 
   useEffect(() => {
@@ -57,7 +57,7 @@ const TopNav = ({ toggleMobileMenu, isMobileOpen }) => {
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: '0.85rem 1.75rem',
-        background: 'var(--color-surface-elevated, #1B1B1B)',
+        background: 'var(--color-surface-elevated, #FFFFFF)',
         borderBottom: '1px solid var(--color-border)',
         position: 'sticky',
         top: 0,

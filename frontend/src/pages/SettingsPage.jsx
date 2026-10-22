@@ -139,8 +139,8 @@ const SettingsPage = ({ videoHistory = [], setVideoHistory }) => {
                 padding: '1.25rem',
                 borderRadius: 'var(--radius)',
                 border: `2px solid ${theme === 'dark' ? 'var(--color-primary)' : 'var(--color-border)'}`,
-                background: '#101010',
-                color: '#FAF7F0',
+                background: '#0F172A',
+                color: '#F1F5F9',
                 textAlign: 'left',
                 cursor: 'pointer',
                 display: 'flex',
@@ -150,11 +150,11 @@ const SettingsPage = ({ videoHistory = [], setVideoHistory }) => {
               }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontWeight: 700, fontSize: '1rem' }}>Obsidian Gold</span>
-                <Moon size={18} style={{ color: '#F5C96A' }} />
+                <span style={{ fontWeight: 700, fontSize: '1rem' }}>Deep Navy</span>
+                <Moon size={18} style={{ color: '#60A5FA' }} />
               </div>
-              <p style={{ fontSize: '0.82rem', color: '#C5C0B6' }}>
-                Deep obsidian palette (#101010) with rich gold accents (#D4A853).
+              <p style={{ fontSize: '0.82rem', color: '#CBD5E1' }}>
+                Deep navy palette (#0F172A) with vibrant blue accents (#3B82F6).
               </p>
             </button>
 
@@ -167,8 +167,8 @@ const SettingsPage = ({ videoHistory = [], setVideoHistory }) => {
                 padding: '1.25rem',
                 borderRadius: 'var(--radius)',
                 border: `2px solid ${theme === 'light' ? 'var(--color-primary)' : 'var(--color-border)'}`,
-                background: '#FAF8F5',
-                color: '#1C1917',
+                background: '#F7FAFF',
+                color: '#1E293B',
                 textAlign: 'left',
                 cursor: 'pointer',
                 display: 'flex',
@@ -178,11 +178,11 @@ const SettingsPage = ({ videoHistory = [], setVideoHistory }) => {
               }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontWeight: 700, fontSize: '1rem' }}>Warm Ivory</span>
-                <Sun size={18} style={{ color: '#D4A853' }} />
+                <span style={{ fontWeight: 700, fontSize: '1rem' }}>Arctic Blue</span>
+                <Sun size={18} style={{ color: '#2563EB' }} />
               </div>
-              <p style={{ fontSize: '0.82rem', color: '#57534E' }}>
-                Warm ivory background with elegant gold accents for daylight focus.
+              <p style={{ fontSize: '0.82rem', color: '#64748B' }}>
+                Clean arctic background (#F7FAFF) with confident blue accents for daylight focus.
               </p>
             </button>
           </div>
